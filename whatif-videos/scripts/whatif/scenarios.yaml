@@ -1,0 +1,719 @@
+# What-if scenarios. Each one is a body falling toward Earth, ~65s long.
+#
+# The distance shrinks from start_mi to contact at an even pace (same time per halving),
+# hitting at impact_s. Pin each beat to one of:
+#   at_s: 12            seconds into the video
+#   gap_mi: 34600000    when the gap between the surfaces reaches this
+#   tide: 1             when its tides reach this many times the Moon's
+#   event: steal        steal (it takes the Moon), recede / surge / flood (the sea),
+#                       rings (Earth reaches its rings), impact
+# A beat can set a subtitle (line), the milestone under the distance (label), or both.
+# Facts are checked against NASA fact sheets; keep new ones just as careful.
+
+- id: saturn-crash
+  title: What if Saturn crashed into Earth?
+  hook: "What if {Saturn} crashed into Earth?"
+  category: space
+  scene: harbor
+  accent: "#f2c879"
+  body:
+    name: Saturn
+    radius_mi: 37449          # equatorial radius
+    mass_earths: 95.16
+    start_mi: 746000000       # as close as it gets to Earth
+    flattening: 0.098
+    rings: [1.24, 2.27]       # C ring inner edge to A ring outer edge
+    bands: ["#ecdcb4", "#c8a26a", "#a7aeb3"]
+    ring_color: "#dccaa5"
+  hud_label: DISTANCE TO SATURN
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "That bright dot is Saturn. It's heading straight for us."}
+    - {gap_mi: 365000000, label: AS CLOSE AS JUPITER EVER GETS}
+    - {at_s: 8.0, line: "Saturn is 95 times heavier than Earth."}
+    - {at_s: 12.0, line: "But it's so light for its size, it would float in water."}
+    - {at_s: 15.0, line: "Its rings are 170,000 miles across, and only about 30 feet thick."}
+    - {gap_mi: 34600000, label: AS CLOSE AS MARS EVER GETS, line: "It's now as close as Mars ever gets."}
+    - {at_s: 21.6, line: "You could see its rings without a telescope."}
+    - {gap_mi: 8000000, label: BIGGER THAN THE FULL MOON, line: "Saturn now looks bigger than the full Moon."}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {at_s: 32.6, line: "Every time the distance halves, its tides get 8 times stronger."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Saturn's gravity pulls the Moon away from Earth."}
+    - {at_s: 40.0, line: "The sea drains away from the shore..."}
+    - {at_s: 42.6, line: "...then comes back hundreds of feet high."}
+    - {gap_mi: 238855, label: WHERE THE MOON USED TO BE, line: "Saturn is now where the Moon used to be."}
+    - {at_s: 49.8, line: "Its pull bends the ground itself. Volcanoes erupt everywhere."}
+    - {event: rings, label: THE RINGS HIT, line: "We hit the rings first: ice moving at 40,000 mph."}
+    - {at_s: 55.0, line: "Saturn's tides tear Earth apart."}
+    - {event: impact, label: IMPACT}
+  final_line: "Saturn has no surface. Earth just sinks in."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch what happens to the Moon 🌙
+  question: What should hit Earth next?
+  hashtags: [whatif, saturn, space, astronomy, science]
+
+- id: rogue-gas-giant
+  title: What if a rogue gas giant passed next to Earth?
+  hook: "What if a {rogue gas giant} passed next to Earth?"
+  category: space
+  scene: harbor
+  mode: flyby
+  accent: "#e7b08a"
+  body:
+    name: Rogue planet
+    radius_mi: 43441          # Jupiter-sized
+    mass_earths: 317.8        # as heavy as Jupiter
+    start_mi: 90000000        # about as far as the Sun
+    closest_mi: 200000        # center to center: closer than the Moon
+    end_mi: 4000000
+    flattening: 0.065
+    bands: ["#e8d6b6", "#a86f4b", "#8f969e"]
+  hud_label: DISTANCE TO ROGUE PLANET
+  closest_s: 38
+  impact_s: 57                # for a flyby: when it's gone and the ending starts
+  beats:
+    - {at_s: 0, label: NO STAR. NO ORBIT.}
+    - {at_s: 3.8, line: "Rogue planets drift between the stars, with no sun to orbit."}
+    - {gap_mi: 24000000, label: CLOSER THAN VENUS EVER GETS, line: "This one is now closer than Venus ever gets."}
+    - {at_s: 10.0, line: "There could be billions of them in our galaxy."}
+    - {gap_mi: 9500000, label: BIGGER THAN THE FULL MOON}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {at_s: 16.6, line: "It's as heavy as Jupiter: 318 Earths."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Its gravity pulls the Moon away from Earth."}
+    - {at_s: 22.3, line: "The sea drains away from the shore..."}
+    - {event: surge, line: "...then comes back hundreds of feet high."}
+    - {at_s: 28.8, line: "Its tides are now thousands of times stronger than the Moon's."}
+    - {gap_mi: 191455, label: CLOSER THAN THE MOON, line: "It's now closer than the Moon."}
+    - {event: closest, label: CLOSEST APPROACH, line: "It looks 50 times wider than the full Moon."}
+    - {at_s: 41.5, line: "Its pull stretches the ground itself. Volcanoes erupt."}
+    - {at_s: 45.5, label: LEAVING, line: "Then, as fast as it came, it's leaving."}
+    - {at_s: 49.5, line: "And it takes the Moon with it."}
+    - {at_s: 53.2, line: "Its pull changed Earth's speed by about 60,000 mph."}
+  final_line: "Earth survives. But it's been knocked out of its orbit."
+  outro: What should pass by Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Wait until it leaves 👀
+  question: What should pass by Earth next?
+  hashtags: [whatif, space, rogueplanet, astronomy, science]
+
+- id: black-hole
+  title: What if a supermassive black hole swallowed Earth?
+  hook: "What if a {supermassive black hole} swallowed Earth?"
+  category: space
+  scene: forest
+  accent: "#f2a65e"
+  body:
+    name: Black hole
+    kind: black_hole
+    radius_mi: 11927000000    # event horizon of 6.5 billion Suns (2.95 km per Sun)
+    mass_earths: 2.1645e15    # 6.5 billion Suns, like M87*, the first black hole ever photographed
+    start_mi: 24927000000000  # 4.24 light-years: as far as the nearest star
+  hud_label: DISTANCE TO BLACK HOLE
+  impact_s: 57                # crossing the event horizon
+  beats:
+    - {at_s: 0, label: AS FAR AS THE NEAREST STAR}
+    - {at_s: 3.8, line: "It's as heavy as 6.5 billion Suns."}
+    - {gap_mi: 6800000000000, label: BIGGER THAN THE FULL MOON, line: "Its shadow already looks bigger than the full Moon."}
+    - {at_s: 14.2, line: "That's the size of the first black hole ever photographed."}
+    - {at_s: 18.6, line: "Its edge is wider than the orbits of all eight planets."}
+    - {at_s: 23.0, line: "Anything that crosses it never comes back. Not even light."}
+    - {at_s: 27.4, line: "Its gravity bends the light behind it into a ring."}
+    - {at_s: 31.8, line: "The glow is gas, heated as it spirals in."}
+    - {at_s: 35.8, line: "We're falling toward it faster every second."}
+    - {event: sun, label: IT PULLS EARTH AWAY FROM THE SUN, line: "Its pull now beats the Sun's grip on Earth."}
+    - {at_s: 44.0, line: "The Sun falls behind us. Night comes for good."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Then it takes the Moon."}
+    - {at_s: 50.2, line: "It's so big, its pull barely stretches us."}
+    - {gap_mi: 3670000000, label: ITS EDGE IS AS CLOSE AS PLUTO}
+    - {at_s: 53.6, line: "We'd cross the edge without feeling a thing."}
+    - {event: impact, label: THE EVENT HORIZON}
+  final_line: "To anyone watching from outside, Earth would seem to freeze at the edge forever."
+  outro: What should swallow Earth next?
+  outro_small: COMMENT BELOW
+  teaser: The last line will mess with your head 🕳️
+  question: What should swallow Earth next?
+  hashtags: [whatif, blackhole, space, astronomy, science]
+
+- id: comet-strike
+  title: What if a comet hit Earth?
+  hook: "What if a {comet} hit Earth?"
+  category: space
+  scene: forest
+  mode: strike
+  accent: "#a8d8ff"
+  body:
+    name: Comet
+    kind: comet
+    radius_mi: 3              # six miles wide
+    mass_earths: 5.0e-11      # about 3e14 kg of ice and dust
+    start_mi: 30000000
+  strike:
+    at_s: 36
+    entry_alt_mi: 62          # the edge of space
+    angle_deg: 45
+    speed_mph: 100000         # long-period comets hit at ~50 km/s; asteroids at ~20
+    site_mi: 300
+    blast_after_s: 15
+    blast_real_s: 1100        # about 18 minutes for the blast to cross 300 miles
+    coma_mi: 10000
+  hud_label: DISTANCE TO COMET
+  impact_s: 57                # for a strike: when the story ends
+  beats:
+    - {at_s: 0, label: HEADED STRAIGHT FOR US}
+    - {at_s: 3.8, line: "A comet: a mountain of ice and dust, six miles wide."}
+    - {at_s: 8.0, line: "About the size of the rock that wiped out the dinosaurs."}
+    - {gap_mi: 238855, label: CLOSER THAN THE MOON, line: "It's now closer than the Moon."}
+    - {at_s: 16.2, line: "Its tail of gas and dust stretches millions of miles."}
+    - {gap_mi: 10000, label: INSIDE ITS GLOWING CLOUD, line: "Earth is now inside its glowing cloud of gas."}
+    - {at_s: 24.4, line: "Comets hit far faster than asteroids. This one: 100,000 mph."}
+    - {at_s: 28.6, line: "Nothing we have could push it aside now."}
+    - {event: entry, label: IT HITS THE ATMOSPHERE, line: "It crosses the entire atmosphere in about 3 seconds."}
+    - {event: strike, label: IMPACT}
+    - {at_s: 36.6, line: "A flash brighter than the Sun. But no sound yet."}
+    - {at_s: 40.6, line: "The ground shakes first: a quake bigger than any ever recorded."}
+    - {at_s: 44.8, line: "It released the energy of billions of atomic bombs."}
+    - {at_s: 47.6, line: "Rock blasted into space falls back, glowing hot."}
+    - {event: blast, line: "Then the air blast hits."}
+    - {at_s: 53.6, line: "Winds stronger than any hurricane flatten the forest."}
+  final_line: "Something like this ended the age of the dinosaurs."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Wait for the sound 🔊
+  question: What should hit Earth next?
+  hashtags: [whatif, comet, space, astronomy, science]
+
+- id: uranus-crash
+  title: What if Uranus crashed into Earth?
+  hook: "What if {Uranus} crashed into Earth?"
+  category: space
+  scene: forest
+  accent: "#9fe3ea"
+  body:
+    name: Uranus
+    radius_mi: 15759          # equatorial radius
+    mass_earths: 14.54
+    start_mi: 1600000000      # about as close as it gets
+    flattening: 0.023
+    rings: [1.637, 2.001]     # ring 6 to the epsilon ring
+    ring_style: uranus
+    ring_open_deg: 68         # tipped on its side: the rings face us like a target
+    ring_roll_deg: 10
+    bands: ["#c6eaee", "#a9d8df", "#9fcdd6"]
+    ring_color: "#77777e"
+    light_color: "#cdeff2"
+  hud_label: DISTANCE TO URANUS
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "Uranus: an ice giant, four times wider than Earth."}
+    - {at_s: 8.0, line: "It's tipped on its side, so its rings face us like a target."}
+    - {at_s: 12.2, line: "It rolls around the Sun like a ball."}
+    - {at_s: 16.4, line: "Its blue-green color comes from methane gas."}
+    - {gap_mi: 34600000, label: AS CLOSE AS MARS EVER GETS, line: "It's now as close as Mars ever gets."}
+    - {at_s: 24.6, line: "One season there lasts 21 years."}
+    - {at_s: 28.4, line: "Only one spacecraft has ever visited it: Voyager 2, in 1986."}
+    - {gap_mi: 3450000, label: BIGGER THAN THE FULL MOON}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Its gravity pulls the Moon away from Earth."}
+    - {gap_mi: 238855, label: WHERE THE MOON USED TO BE, line: "Uranus is now where the Moon used to be."}
+    - {at_s: 47.4, line: "Its clouds hit -371°F, the coldest air of any planet."}
+    - {event: rings, label: THE RINGS HIT, line: "We hit its thin, dark rings first."}
+    - {event: impact, label: IMPACT}
+  final_line: "Earth sinks into an ocean of hot, icy fluid."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: The planet that rolls on its side 🪐
+  question: What should hit Earth next?
+  hashtags: [whatif, uranus, space, astronomy, science]
+
+- id: neptune-crash
+  title: What if Neptune crashed into Earth?
+  hook: "What if {Neptune} crashed into Earth?"
+  category: space
+  scene: harbor
+  accent: "#8fb4ff"
+  body:
+    name: Neptune
+    radius_mi: 15299          # equatorial radius
+    mass_earths: 17.15
+    start_mi: 2700000000      # about as close as it gets
+    flattening: 0.017
+    rings: [1.69, 2.539]      # Galle ring to the Adams ring
+    ring_style: neptune
+    bands: ["#5f8de2", "#3e66c6", "#6c90d8"]
+    ring_color: "#6c6c74"
+    light_color: "#a8c4ff"
+  hud_label: DISTANCE TO NEPTUNE
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "Neptune: the farthest planet from the Sun."}
+    - {at_s: 8.0, line: "Sunlight takes four hours to reach it."}
+    - {at_s: 12.2, line: "It was found with math, before anyone ever saw it."}
+    - {at_s: 16.4, line: "Its winds are the fastest in the solar system: 1,200 mph."}
+    - {gap_mi: 34600000, label: AS CLOSE AS MARS EVER GETS, line: "It's now as close as Mars ever gets."}
+    - {at_s: 25.2, line: "One year there lasts 165 of ours."}
+    - {at_s: 29.4, line: "Since we found it, it has gone around the Sun just once."}
+    - {gap_mi: 3350000, label: BIGGER THAN THE FULL MOON}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Its gravity pulls the Moon away from Earth."}
+    - {event: surge, line: "The sea drains away, then comes back hundreds of feet high."}
+    - {gap_mi: 238855, label: WHERE THE MOON USED TO BE, line: "Neptune is now where the Moon used to be."}
+    - {at_s: 48.8, line: "The ground buckles. Volcanoes wake up all over the world."}
+    - {event: rings, label: THE RINGS HIT, line: "We hit its faint rings first."}
+    - {at_s: 55.2, line: "Its tides tear Earth apart."}
+    - {event: impact, label: IMPACT}
+  final_line: "Earth sinks toward an ocean where it may rain diamonds."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: The ending is wild 💎
+  question: What should hit Earth next?
+  hashtags: [whatif, neptune, space, astronomy, science]
+
+- id: star-flyby
+  title: What if a star passed through the solar system?
+  hook: "What if a {star} passed through our solar system?"
+  category: space
+  scene: harbor
+  mode: flyby
+  accent: "#ff9a6a"
+  body:
+    name: Red dwarf
+    kind: star
+    radius_mi: 52000          # 0.12 of the Sun's radius
+    mass_earths: 33300        # a tenth of the Sun's mass
+    start_mi: 5880000000000   # one light-year: the outer edge of the solar system
+    closest_mi: 3000000
+    end_mi: 300000000
+    luminosity_suns: 0.001
+    star_color: "#ff7040"
+    light_color: "#ff9a6a"
+  hud_label: DISTANCE TO STAR
+  closest_s: 38
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AT THE EDGE OF THE SOLAR SYSTEM}
+    - {at_s: 3.8, line: "A red dwarf: a small, dim star. Most stars near us are like it."}
+    - {at_s: 8.0, line: "A tenth of the Sun's mass. Still 100 times heavier than Jupiter."}
+    - {at_s: 12.2, line: "It knocks comets loose from the edge of the solar system."}
+    - {gap_mi: 3670000000, label: CLOSER THAN PLUTO, line: "It's now closer than Pluto."}
+    - {gap_mi: 1860000000, label: AS BRIGHT AS THE FULL MOON, line: "It now shines as bright as the full Moon."}
+    - {at_s: 23.0, line: "Its gravity starts bending the orbits of the planets."}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans matches the Moon's."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Its gravity takes the Moon."}
+    - {event: surge, line: "The sea drains away, then comes back hundreds of feet high."}
+    - {event: closest, label: AS BRIGHT AS THE SUN, line: "Night disappears. Earth has two suns."}
+    - {at_s: 41.8, line: "With twice the sunlight, the heat turns deadly."}
+    - {at_s: 45.5, label: LEAVING, line: "Then, a few days later, it's leaving."}
+    - {at_s: 49.4, line: "70,000 years ago, a real red dwarf grazed our solar system's edge."}
+    - {at_s: 53.6, line: "In 1.3 million years, the star Gliese 710 will do it again."}
+  final_line: "For a few days, Earth had two suns."
+  outro: What should pass by Earth next?
+  outro_small: COMMENT BELOW
+  teaser: This has actually happened before ⭐
+  question: What should pass by Earth next?
+  hashtags: [whatif, space, stars, astronomy, science]
+
+- id: jupiter-crash
+  title: What if Jupiter crashed into Earth?
+  hook: "What if {Jupiter} crashed into Earth?"
+  category: space
+  scene: forest
+  accent: "#f0b88a"
+  body:
+    name: Jupiter
+    radius_mi: 43441          # equatorial radius
+    mass_earths: 317.8
+    start_mi: 365000000       # as close as it gets
+    flattening: 0.065
+    bands: ["#efe0c4", "#b8875c", "#a89c90"]
+    spot: [-22, -20, 0.09]    # the Great Red Spot, south of the equator
+    spot_color: "#c35f3e"
+    light_color: "#ffe2c0"
+  hud_label: DISTANCE TO JUPITER
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "Jupiter: heavier than all the other planets put together."}
+    - {at_s: 8.0, line: "More than 1,300 Earths would fit inside it."}
+    - {at_s: 12.2, line: "A day there lasts less than 10 hours."}
+    - {gap_mi: 34600000, label: AS CLOSE AS MARS EVER GETS, line: "It's now as close as Mars ever gets."}
+    - {at_s: 19.2, line: "It may be the oldest planet in the solar system."}
+    - {gap_mi: 9500000, label: BIGGER THAN THE FULL MOON}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {at_s: 28.6, line: "It's a ball of gas. There's nowhere to stand."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Its gravity pulls the Moon away from Earth."}
+    - {at_s: 36.4, line: "That red spot is a storm wider than Earth."}
+    - {at_s: 40.6, line: "That storm has been raging for more than 150 years."}
+    - {gap_mi: 238855, label: WHERE THE MOON USED TO BE, line: "Jupiter is now where the Moon used to be."}
+    - {at_s: 49.6, line: "Its tides are now tens of thousands of times the Moon's."}
+    - {gap_mi: 18640, label: EARTH STARTS TO BREAK APART, line: "Its tides tear Earth apart before it even touches."}
+    - {event: impact, label: IMPACT}
+  final_line: "Jupiter barely notices. It just got 0.3% heavier."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Jupiter wouldn't even notice 😳
+  question: What should hit Earth next?
+  hashtags: [whatif, jupiter, space, astronomy, science]
+
+- id: earth-ejected
+  title: What if Earth was flung out of the galaxy?
+  hook: "What if Earth was {flung out of the galaxy}?"
+  category: space
+  scene: forest
+  mode: escape
+  accent: "#b8a8ff"
+  body: {name: Earth, radius_mi: 3959, mass_earths: 1, start_mi: 93000000}
+  escape:
+    speed_mph: 2200000        # ~1,000 km/s; escaping the Milky Way from here takes about 1.2 million mph
+    start_hours: 1
+    end_years: 30000000
+  hud_label: DISTANCE FROM THE SUN
+  impact_s: 57                # when the story ends
+  beats:
+    - {at_s: 0, label: SLUNG AT 2.2 MILLION MPH}
+    - {at_s: 3.8, line: "Imagine something slings Earth away from the Sun at 2.2 million mph."}
+    - {gap_mi: 142000000, label: PAST MARS'S ORBIT}
+    - {at_s: 7.6, line: "That's almost twice the speed needed to escape the Milky Way."}
+    - {gap_mi: 484000000, label: PAST JUPITER'S ORBIT}
+    - {at_s: 11.6, line: "Within a week, it's below 0°F everywhere."}
+    - {gap_mi: 2790000000, label: PAST NEPTUNE'S ORBIT, line: "Two months in, the Sun is just a very bright star."}
+    - {gap_mi: 15700000000, label: FARTHER THAN VOYAGER 1, line: "After a year: -100°F. The seas freeze over."}
+    - {at_s: 24.0, line: "The Moon comes with us. With no sunlight, it goes dark."}
+    - {at_s: 28.2, line: "No sunlight means no wind and no weather. Just cold."}
+    - {at_s: 32.2, line: "Deep down, Earth's own heat keeps some ocean water liquid."}
+    - {gap_mi: 24930000000000, label: PAST THE NEAREST STAR, line: "After 1,300 years, we're as far away as the nearest star."}
+    - {at_s: 39.5, line: "Our Sun is now just one star among thousands."}
+    - {years: 25000, line: "It's so cold that the air itself freezes and falls as snow."}
+    - {years: 300000, label: LEAVING THE MILKY WAY'S DISK, line: "After 300,000 years, we rise out of the Milky Way's disk."}
+    - {at_s: 51.2, label: LOOKING BACK AT THE MILKY WAY, line: "Millions of years later, the whole galaxy spreads out before us."}
+    - {at_s: 54.8, line: "Hundreds of billions of stars, and Earth belongs to none of them."}
+  final_line: "Down in the dark ocean, life might still hang on."
+  outro: Where should we send Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the sky at the end 🌌
+  question: Where should we send Earth next?
+  hashtags: [whatif, space, milkyway, astronomy, science]
+
+# Mars crash. Physics (center-to-center unless noted; Earth R 3,959 mi, Mars R 2,106 mi, 0.107 Earths):
+#   contact at 6,065 mi center; start 34.6M mi (closest Mars ever gets, 2003)
+#   bigger than the full Moon: 220 x 2,106 = 463,000 mi center
+#   tides = Moon's: 238,855 x (0.107/0.0123)^(1/3) = 491,000 mi center (10x at 228,000; 3000x at 34,000)
+#   Earth's (fluid) Roche limit for Mars: 2.44 x 3,959 x (5.51/3.93)^(1/3) = 10,800 mi center (gap ~4,700)
+#   geostationary satellites: 22,236 mi altitude
+#   minimum impact speed = mutual escape speed: 11.2 km/s x sqrt(1.107 x 6,371/9,761) = 9.5 km/s = 21,300 mph
+#   energy ~0.5 x 6.4e23 kg x (9.5 km/s)^2 = 3e31 J, ~70 million x Chicxulub (4e23 J)
+#   Theia, the body thought to have hit Earth and made the Moon, was about the size of Mars
+- id: mars-crash
+  title: What if Mars crashed into Earth?
+  hook: "What if {Mars} crashed into Earth?"
+  category: space
+  scene: harbor
+  accent: "#e8845a"
+  body:
+    name: Mars
+    radius_mi: 2106           # equatorial radius
+    mass_earths: 0.107
+    start_mi: 34600000        # as close as it ever gets (2003)
+    flattening: 0.006
+    surface: rocky            # mottled terrain and small polar caps instead of gas-giant bands
+    bands: ["#cc7a4e", "#7a4a36", "#f2ece4"]   # rusty plains, dark regions, polar caps
+    el_deg: 13                # a little higher than the harbor default (10) so the small disk clears the peak
+    light_color: "#ffb08a"
+  hud_label: DISTANCE TO MARS
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "That red dot is Mars. It's heading straight for us."}
+    - {gap_mi: 24000000, label: CLOSER THAN VENUS EVER GETS}
+    - {at_s: 7.9, line: "Mars is half as wide as Earth, and a tenth as heavy."}
+    - {at_s: 12.0, line: "It's red because its dust is full of rust."}
+    - {at_s: 16.1, line: "It has the tallest volcano in the solar system: Olympus Mons."}
+    - {at_s: 20.2, line: "Its two small moons, Phobos and Deimos, come along with it."}
+    - {at_s: 24.3, line: "When it hits, it will be moving at least 20,000 mph."}
+    - {gap_mi: 457000, label: BIGGER THAN THE FULL MOON, line: "Mars now looks bigger than the full Moon."}
+    - {gap_mi: 232790, label: CLOSER THAN THE MOON, line: "It's now closer than the Moon, with tides almost 10 times stronger."}
+    - {at_s: 36.9, line: "The sea drains away from the shore..."}
+    - {event: surge, line: "...then comes back hundreds of feet high."}
+    - {event: flood, line: "The water floods the city. The power goes out."}
+    - {gap_mi: 22236, label: CLOSER THAN OUR WEATHER SATELLITES}
+    - {at_s: 49.6, line: "The ground buckles. Volcanoes erupt all over the world."}
+    - {gap_mi: 4700, label: EARTH'S PULL TEARS AT MARS, line: "Earth's gravity starts pulling Mars apart. Too late."}
+    - {event: impact, label: IMPACT}
+  final_line: "Scientists think this happened before. The wreckage became our Moon."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Wait for the last line 🌙
+  question: What should hit Earth next?
+  hashtags: [whatif, mars, space, astronomy, science]
+
+- id: pulsar-crash
+  title: What if a pulsar crashed into Earth?
+  hook: "What if a {pulsar} crashed into Earth?"
+  category: space
+  scene: harbor
+  accent: "#9cc4ff"
+  body:
+    name: Pulsar
+    kind: pulsar
+    radius_mi: 7              # ~11 km: a neutron star is about 14 miles across
+    mass_earths: 466000       # 1.4 Suns
+    start_mi: 2939500000000000  # 500 light-years
+    spin_hz: 0.5              # on screen: one turn every 2 s
+    spin_real_hz: 30          # really 30 turns a second, like the Crab pulsar -> "SPIN SHOWN 60x SLOWER"
+    star_color: "#dfe9ff"
+    beam_color: "#9cc4ff"
+    light_color: "#a9c2ff"
+  hud_label: DISTANCE TO PULSAR
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: HEADED STRAIGHT FOR US}
+    - {at_s: 3.8, line: "That flashing dot is a pulsar. It's heading straight for us."}
+    - {at_s: 8.0, line: "It's the crushed core of a giant star that exploded."}
+    - {gap_mi: 24930000000000, label: CLOSER THAN THE NEAREST STAR}
+    - {at_s: 12.2, line: "It's heavier than the Sun, but only about 14 miles across."}
+    - {at_s: 16.4, line: "A teaspoon of it would weigh about a billion tons."}
+    - {at_s: 20.6, line: "As it spins, two beams sweep around it like a lighthouse."}
+    - {at_s: 24.6, line: "This one really spins 30 times every second."}
+    - {gap_mi: 15000000000, label: CLOSER THAN VOYAGER 1}
+    - {gap_mi: 3670000000, label: CLOSER THAN PLUTO, line: "It's now closer than Pluto."}
+    - {at_s: 32.4, line: "Its surface gravity is about 100 billion times Earth's."}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {event: steal, label: IT STEALS THE MOON}
+    - {event: surge, line: "The sea drains away, then comes back hundreds of feet high."}
+    - {at_s: 44.2, line: "Its gravity has pulled the Moon away from Earth."}
+    - {gap_mi: 745000, label: EARTH STARTS TO BREAK APART}
+    - {at_s: 48.2, line: "Its tides are now strong enough to tear Earth apart."}
+    - {at_s: 52.3, line: "What's left falls in at more than half the speed of light."}
+    - {event: impact, label: IMPACT}
+  final_line: "Something the size of a city just erased Earth."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: It's only 14 miles wide. Watch what it does 👀
+  question: What should hit Earth next?
+  hashtags: [whatif, pulsar, space, astronomy, science]
+
+# Temperature mode: the air itself changes by a fixed amount every second. Beats pin to temp_f.
+- id: hotter-every-second
+  title: What if it got 10 degrees hotter every second?
+  hook: "What if it got 10 degrees {hotter} every second?"
+  category: earth
+  scene: boardwalk
+  mode: temperature
+  accent: "#ff9a4a"
+  temperature: {start_f: 75, rate_f_per_s: 10}
+  hud_label: TEMPERATURE
+  impact_s: 57                # 645°F when the story ends
+  beats:
+    - {at_s: 0, label: A SUMMER EVENING}
+    - {at_s: 3.8, line: "Every second, it gets 10 degrees hotter."}
+    - {temp_f: 134, label: HOTTEST DAY EVER RECORDED, line: "Past 134: hotter than any day ever recorded."}   # Death Valley, 1913
+    - {at_s: 10.0, line: "The grass dries out. Everyone runs for shade."}
+    - {temp_f: 212, label: WATER BOILS, line: "At 212, the lake boils."}
+    - {temp_f: 265, label: THE POWER FAILS, line: "The wiring cooks. The lights and rides die."}
+    - {at_s: 24.5, line: "Balloons burst. Plastic bins slump and sag."}
+    - {temp_f: 356, label: POPCORN POPS, line: "At 356, every kernel in the cart pops at once."}
+    - {at_s: 32.6, line: "The leaves curl up and crisp."}
+    - {temp_f: 451, label: PAPER BURNS BY ITSELF, line: "At 451, paper needs no spark."}
+    - {at_s: 41.6, line: "The awnings and tents catch next."}
+    - {at_s: 45.7, line: "Wood is close to its limit now."}
+    - {temp_f: 572, label: WOOD BURNS BY ITSELF, line: "Wood goes at 572. Every tree, every board, at once."}
+    - {temp_f: 621, label: LEAD MELTS, line: "At 621, lead melts."}
+  final_line: "In 22 more seconds, it would be as hot as Venus."   # Venus averages 867°F
+  outro: Hotter or colder next?
+  outro_small: COMMENT BELOW
+  teaser: Watch what happens at 451 👀
+  question: Hotter or colder next?
+  hashtags: [heatwave, temperature, science]
+
+- id: colder-every-second
+  title: What if it got 10 degrees colder every second?
+  hook: "What if it got 10 degrees {colder} every second?"
+  category: earth
+  scene: plaza
+  mode: temperature
+  accent: "#8fc8ff"
+  temperature: {start_f: 75, rate_f_per_s: -10}
+  hud_label: TEMPERATURE
+  impact_s: 54                # absolute zero (−459.67°F) arrives at 53.5s and holds
+  beats:
+    - {at_s: 0, label: A SUMMER EVENING}
+    - {at_s: 3.8, line: "Every second, it gets 10 degrees colder."}
+    - {temp_f: 32, label: WATER FREEZES}
+    - {at_s: 7.9, line: "The river is warmer than the air now. It steams."}
+    - {temp_f: -40, label: "−40°F IS ALSO −40°C", line: "At −40, Fahrenheit and Celsius agree."}
+    - {temp_f: -109, label: CARBON DIOXIDE FREEZES, line: "At −109, carbon dioxide freezes out of the air."}
+    - {temp_f: -128.6, label: COLDEST EVER ON EARTH}   # Vostok Station, Antarctica, 1983
+    - {at_s: 22.6, line: "Colder than anywhere on Earth has ever been."}
+    - {temp_f: -166, label: COLDER THAN JUPITER}       # Jupiter's cloud tops, NASA
+    - {at_s: 26.8, line: "Colder than the clouds of Jupiter."}
+    - {at_s: 30.9, line: "The balloons shrivel as the helium inside contracts."}
+    - {temp_f: -297, label: OXYGEN TURNS LIQUID, line: "At −297, the oxygen in the air turns to liquid."}
+    - {temp_f: -320, label: THE AIR RAINS OUT}
+    - {at_s: 41.3, line: "Then the nitrogen. The air itself rains down."}
+    - {at_s: 45.3, line: "With no air left, the sky goes black. And silent."}
+    - {temp_f: -400, label: COLDER THAN PLUTO}           # Pluto: about −375 to −400°F, NASA
+    - {at_s: 49.6, line: "Colder than Pluto. The atoms barely move."}
+    - {event: impact, label: ABSOLUTE ZERO}
+  final_line: "Absolute zero. Nothing in the universe can get colder."
+  outro: Hotter or colder next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the sky at −320 🌌
+  question: Hotter or colder next?
+  hashtags: [freezing, temperature, science]
+
+# Temperature mode, driven by distance: Earth's distance to the Sun shrinks 1% every second (0.99^t),
+# and the average surface temperature follows distance^-1/2 from today's 59°F.
+- id: sun-one-percent-closer
+  title: What if Earth got 1% closer to the Sun every second?
+  hook: "What if Earth got 1% {closer to the Sun} every second?"
+  category: space
+  scene: boardwalk
+  mode: temperature
+  accent: "#ffc45a"
+  temperature: {start_f: 59, sun_factor_per_s: 0.99}
+  hud_label: DISTANCE TO THE SUN
+  impact_s: 57                # 0.564 of today's distance (52.5 million mi), average 231°F
+  beats:
+    - {at_s: 0, label: WHERE WE ARE TODAY}
+    - {at_s: 3.8, line: "Every second, Earth gets 1% closer to the Sun."}
+    - {au: 0.95, label: INNER EDGE OF THE HABITABLE ZONE}   # Kasting et al. 1993
+    - {at_s: 7.9, line: "Just 5% closer, we leave the Sun's habitable zone."}
+    - {temp_f: 92, label: AVERAGE IS A HEAT WAVE, line: "Earth's average temperature passes 90°F."}
+    - {at_s: 16.4, line: "The crowd heads for the shade."}
+    - {at_s: 20.5, line: "Every second, sunlight gets 2% stronger."}
+    - {temp_f: 134, label: HOTTER THAN ANY RECORD, line: "On average, it's hotter than the hottest day ever recorded."}
+    - {au: 0.723, label: PASSING VENUS'S ORBIT, line: "We pass the orbit of Venus."}
+    - {au: 0.7071, label: SUNLIGHT TWICE AS STRONG}
+    - {at_s: 36.4, line: "Sunlight is now twice as strong as today."}
+    - {au: 0.6667, label: "THE SUN LOOKS 1.5× WIDER", line: "The Sun looks one and a half times wider."}
+    - {at_s: 44.5, line: "The grass and trees are dry as straw."}
+    - {at_s: 47.3, line: "Sunlight is now two and a half times as strong."}
+    - {temp_f: 212, label: WATER BOILS, line: "At 212, the lake boils."}
+  final_line: "At this rate, Earth would touch the Sun in 9 minutes."   # 0.99^t = 432,690 / 93M at t = 534 s
+  outro: Where should we send Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the size of the Sun ☀️
+  question: Where should we send Earth next?
+  hashtags: [sun, space, science]
+
+- id: red-supergiant
+  title: What if Earth got swallowed by a red supergiant?
+  hook: "What if Earth got swallowed by {Stephenson 2-18}?"
+  category: space
+  scene: harbor
+  accent: "#ff6a3a"
+  body:
+    name: Stephenson 2-18
+    kind: star
+    radius_mi: 930000000      # ~2,150 solar radii (estimates vary): past Saturn's orbit if it replaced the Sun
+    mass_earths: 0.000001     # its mass is poorly known; the story here is its light, not its gravity
+    start_mi: 5879000000000   # one light-year (it is really about 19,000 light-years away)
+    luminosity_suns: 440000
+    el_deg: 14                # clear of the harbor's central peak
+    star_color: "#ff4e22"     # about 3,200 K: cooler and redder than the Sun
+    light_color: "#ff7a48"
+  hud_label: DISTANCE TO THE STAR
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: A RED SUPERGIANT}
+    - {at_s: 3.8, line: "Stephenson 2-18: one of the biggest stars ever found."}
+    - {at_s: 7.9, line: "Even a light-year away, it outshines the full Moon."}
+    - {at_s: 12.0, line: "It's about 2,150 times wider than our Sun."}
+    - {at_s: 16.1, line: "You could fit 10 billion Suns inside it."}
+    - {at_s: 20.2, line: "In our Sun's place, it would reach past Saturn."}
+    - {at_s: 24.4, line: "Already, its light is warming the planet."}
+    - {temp_f: 134, label: HOTTER THAN ANY RECORD}
+    - {gap_mi: 60800000000, label: BRIGHTER THAN THE SUN, line: "Now it's brighter than our Sun."}
+    - {temp_f: 212, label: THE OCEANS BOIL, line: "The oceans begin to boil."}
+    - {at_s: 35.8, line: "On average, Earth is hotter than an oven."}
+    - {temp_f: 572, label: WOOD BURNS BY ITSELF, line: "Every tree and building catches fire at once."}
+    - {at_s: 42.6, line: "It looks over 20 times wider than our Sun."}
+    - {gap_mi: 3670000000, label: CLOSER THAN PLUTO, line: "It's now closer than Pluto is to the Sun."}
+    - {temp_f: 1800, label: ROCK MELTS}
+    - {at_s: 50.9, line: "Then the ground itself starts to melt."}
+    - {event: impact, label: INSIDE THE STAR}
+  final_line: "Its outer layers are thinner than air, and over 5,000°F."   # photosphere ~3,200 K
+  outro: What should swallow Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the sky turn red 🔴
+  question: What should swallow Earth next?
+  hashtags: [stars, space, astronomy]
+
+- id: moon-crash
+  title: What if the Moon crashed into Earth?
+  hook: "What if the {Moon} crashed into Earth?"
+  category: space
+  scene: harbor
+  accent: "#cfd6e6"
+  body:
+    name: Moon
+    is_moon: true
+    radius_mi: 1080
+    mass_earths: 0.0123
+    start_mi: 238855          # where it is today
+    el_deg: 15                # clear of the harbor's central peak
+    surface: rocky
+    bands: ["#c9c6bf", "#6f6c66", "#c9c6bf"]   # highlands, maria, no polar caps
+    light_color: "#dfe6ff"
+  hud_label: DISTANCE TO THE MOON
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: OUR MOON}
+    - {at_s: 3.8, line: "Imagine the Moon stopped orbiting. It would fall."}
+    - {at_s: 7.9, line: "In real life, the fall would take about five days."}
+    - {gap_mi: 114389, label: TWICE AS WIDE AS USUAL}
+    - {event: recede, label: THE SEA PULLS BACK}
+    - {at_s: 12.0, line: "It already looks twice as wide as usual."}
+    - {at_s: 16.1, line: "Its tides grow. The sea pulls back from the shore."}
+    - {at_s: 20.2, line: "Each time the distance halves, its tides get 8 times stronger."}
+    - {at_s: 24.3, line: "It's 2,159 miles wide: almost as wide as the US."}
+    - {event: surge, label: THE WAVE COMES, line: "...then the sea comes back as a giant wave."}
+    - {gap_mi: 18847, label: 10 TIMES WIDER THAN USUAL, line: "It now looks 10 times wider than the full Moon."}
+    - {event: flood, label: THE CITY FLOODS, line: "Its tides are 3,000 times normal. The city floods."}
+    - {at_s: 44.8, line: "The ground heaves. Volcanoes erupt everywhere."}
+    - {at_s: 48.9, line: "It hits at about 22,000 mph."}
+    - {at_s: 53.0, line: "Two worlds, about to become one."}
+    - {event: impact, label: IMPACT}
+  final_line: "Earth's whole surface would melt into an ocean of magma."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the sea before it hits 🌊
+  question: What should hit Earth next?
+  hashtags: [moon, space, astronomy]
+
+- id: sun-goes-out
+  title: What if the Sun suddenly went out?
+  hook: "What if the {Sun} suddenly went out?"
+  category: space
+  scene: plaza
+  mode: temperature
+  accent: "#ffcf6a"
+  temperature: {start_hours: 0.01667, end_years: 1000000, light_delay_min: 8.33}   # 1 minute to 1 million years
+  hud_label: TEMPERATURE
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: THE SUN IS GONE}
+    - {at_s: 3.8, line: "Its last light takes 8 minutes to reach us. Then: night."}
+    - {at_s: 7.9, line: "Everyone heads home in the dark."}
+    - {at_s: 12.0, line: "Stars fill the sky in the middle of the day."}
+    - {at_s: 16.0, line: "Within days, the fountains and rivers freeze."}
+    - {temp_f: 32, label: WATER FREEZES}
+    - {years: 0.0192, label: BELOW 0°F EVERYWHERE, line: "After a week, it's below 0°F everywhere."}
+    - {at_s: 24.0, line: "One by one, the city's lights fail."}
+    - {years: 1, label: "−100°F", line: "After a year: −100°F. The seas are frozen over."}
+    - {temp_f: -109, label: CARBON DIOXIDE FREEZES}
+    - {at_s: 32.4, line: "Carbon dioxide freezes out of the air as snow."}
+    - {at_s: 36.5, line: "Deep under the ice, the oceans stay liquid for ages."}
+    - {at_s: 40.6, line: "Centuries pass. The cold keeps deepening."}
+    - {temp_f: -297, label: OXYGEN TURNS LIQUID, line: "After 9,000 years, the oxygen in the air turns liquid."}
+    - {temp_f: -320, label: THE AIR RAINS OUT}
+    - {at_s: 51.8, line: "Then the nitrogen. The air itself rains down."}
+  final_line: "Near volcanic vents on the sea floor, some life could survive."
+  outro: What should happen to the Sun next?
+  outro_small: COMMENT BELOW
+  teaser: Watch what happens at 8 minutes ⏱️
+  question: What should happen to the Sun next?
+  hashtags: [sun, space, science]
