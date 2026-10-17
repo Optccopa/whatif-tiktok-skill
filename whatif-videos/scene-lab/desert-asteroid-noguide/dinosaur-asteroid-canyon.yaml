@@ -1,0 +1,48 @@
+# The dinosaur-killing asteroid again, seen from a desert canyon overlook with a highway below.
+- id: dinosaur-asteroid-canyon
+  title: What if the dinosaur-killing asteroid hit today?
+  hook: "What if the {dinosaur-killing asteroid} hit today?"
+  category: space
+  scene: canyon
+  mode: strike
+  accent: "#ffb26a"
+  body:
+    name: Asteroid
+    kind: asteroid
+    radius_mi: 3              # about 6 miles wide (Chicxulub impactor)
+    mass_earths: 2.0e-10      # roughly a trillion tons of rock
+    start_mi: 30000000
+  strike:
+    at_s: 36
+    entry_alt_mi: 62
+    angle_deg: 60
+    speed_mph: 45000          # about 20 km/s
+    site_mi: 300
+    blast_after_s: 15
+    blast_real_s: 1100
+    coma_mi: 12               # no glowing cloud: just a lit rock
+  hud_label: DISTANCE TO ASTEROID
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: HEADED STRAIGHT FOR US}
+    - {at_s: 3.8, line: "66 million years ago, a rock like this ended the dinosaurs."}
+    - {at_s: 7.9, line: "It's about 6 miles wide: taller than Mount Everest."}
+    - {gap_mi: 238855, label: CLOSER THAN THE MOON, line: "It's now closer than the Moon."}
+    - {at_s: 16.1, line: "45,000 mph: about 600 times faster than the cars below."}
+    - {at_s: 20.2, line: "At that speed, it would cross the US in four minutes."}
+    - {at_s: 24.3, line: "It hits with more energy than every nuke ever built."}
+    - {at_s: 28.4, line: "Nothing we have could stop it now."}
+    - {event: entry, label: IT HITS THE ATMOSPHERE, line: "It crosses the atmosphere in about 6 seconds."}
+    - {event: strike, label: IMPACT}
+    - {at_s: 36.6, line: "A flash brighter than the Sun. But no sound yet."}
+    - {at_s: 40.6, line: "Down on the highway, every car has stopped."}
+    - {at_s: 44.7, line: "Rock blasted into space falls back, glowing hot."}
+    - {at_s: 47.9, line: "It leaves a crater over 100 miles wide."}
+    - {event: blast, line: "Then the air blast hits."}
+    - {at_s: 53.6, line: "Winds stronger than any hurricane sweep up the canyon."}
+  final_line: "Then the dust would block the Sun for years."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the highway 👀
+  question: What should hit Earth next?
+  hashtags: [asteroid, dinosaurs, space]

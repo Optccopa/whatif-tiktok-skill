@@ -1,0 +1,425 @@
+"""The beach scene: a tropical bay at sunset, for "what if it got hotter every second?".
+
+Layout (meters): the camera stands 16 m over the sand and looks out (-z) along a curving
+shoreline: the sea on the left, the beach on the right. Towels, striped umbrellas, loungers,
+kayaks and people fill the sand near the camera; a thatched beach bar with string lights sits
+right, a lifeguard tower at the waterline. Palms and a lamp-lit promenade line the back of the
+beach, with pastel hotels behind. The bay closes ~200 m out at a green headland with a
+red-and-white lighthouse, the hero landmark. Out to sea: sailboats, a low palm island and purple
+volcanic peaks under a sun low on the left. Every change follows the temperature: people leave,
+palms dry and brown, the sea boils at 213°F, the power fails, beach balls burst, plastic slumps,
+paperbacks light at 451°F, umbrellas and thatch next, and all the wood at 572°F. The sand stays.
+"""
+
+from __future__ import annotations
+
+import math
+
+import numpy as np
+
+from whatif import props
+from whatif.gl import Frame, look_at, ortho
+from whatif.meshes import BUILDING, GLOW, GROUND, STRIPES, WATER, Instances, align_y, chain, rgb, rx, ry, sc, tr
+from whatif.scenario import Effects, Timeline, ramp
+
+SEA_Y = -0.3
+# The waterline (z, x): land is to the right (x > shore). The bay curls out to a headland tip at z≈-192.
+SHORE = np.array([(80, -16), (20, -11), (-20, -6), (-60, -1), (-100, 4), (-130, 6), (-155, 2), (-175, -6),
+                  (-192, -16), (-210, -14), (-230, 5), (-260, 50), (-300, 150), (-350, 400)], dtype=float)
+LIGHTHOUSE = np.array([-12.0, 7.5, -196.0])
+SUN_AZ_EL = (-9.0, 7.0)
+CAMERA = np.array([0.0, 16.0, 40.0])
+LOOK = np.array([0.0, 8.5, -60.0])
+SAND = rgb("#ecd5a8")
+
+
+def shore_x(z):
+    return np.interp(-np.asarray(z, dtype=float), -SHORE[:, 0], SHORE[:, 1])
+
+
+def back_x(z):
+    """The back of the beach (the promenade): wide near the camera, narrower toward the headland."""
+    return shore_x(z) + np.interp(-np.asarray(z, dtype=float), [-40.0, 180.0], [26.0, 16.0])
+
+
+def strip_mesh(x0, x1, z0=80.0, z1=-350.0, n=240, skirt=0.0) -> np.ndarray:
+    """A flat ribbon between x0(z) and x1(z) at y=0 (triangles), with an optional skirt down the x0 edge."""
+    zs = np.linspace(z0, z1, n)
+    a, b = x0(zs), x1(zs)
+    out = []
+    for i in range(n - 1):
+        p = [(a[i], 0, zs[i]), (b[i], 0, zs[i]), (b[i + 1], 0, zs[i + 1]), (a[i + 1], 0, zs[i + 1])]
+        out += [p[0], p[1], p[2], p[0], p[2], p[3]]
+        if skirt:
+            q = [(a[i], -skirt, zs[i]), (a[i + 1], -skirt, zs[i + 1])]
+            out += [p[0], p[3], q[1], p[0], q[1], q[0]]
+    return np.asarray(out, dtype=np.float32)
+
+
+def _dir(az, el):
+    a, e = math.radians(az), math.radians(el)
+    return np.array([math.sin(a) * math.cos(e), math.sin(e), -math.cos(a) * math.cos(e)])
+
+
+def _mix(a, b, k):
+    return tuple(x * (1 - k) + y * k for x, y in zip(a, b))
+
+
+def _dome_y(x, z, dome):
+    cx, cz, w, h, d = dome
+    k = 1 - ((x - cx) / (w / 2)) ** 2 - ((z - cz) / (d / 2)) ** 2
+    return h / 2 * math.sqrt(max(k, 0.0)) - 2.0
+
+
+class Beach:
+    body_az_el = SUN_AZ_EL
+    moon_az_el = (40.0, 25.0)
+
+    def __init__(self, timeline: Timeline, seed: int = 0):
+        self.timeline = timeline
+        rng = np.random.default_rng(seed + 41)
+        self.static = Instances()
+        self.meshes = {
+            "sand": strip_mesh(shore_x, lambda z: back_x(z) + 1.0, skirt=2.5),
+            "wet": strip_mesh(shore_x, lambda z: shore_x(z) + 2.6),
+            "foam": strip_mesh(lambda z: shore_x(z) - 0.5, shore_x, z0=60.0, z1=-230.0),
+            "walk": strip_mesh(lambda z: back_x(z) + 1.0, lambda z: back_x(z) + 5.0),
+            "grass": strip_mesh(lambda z: back_x(z) + 5.0, lambda z: np.full_like(z, 900.0)),
+        }
+        self.palms = []  # (top, yaw0, frond length, seed)
+        self.fire = []  # (x, y, z, size, °F)
+        self._ground(rng)
+        self._sea(rng)
+        self._headland(rng)
+        self._back(rng)
+        self._beach_things(rng)
+        self._bar(rng)
+        self._crowd(rng)
+        self.sign_point = props.sign_post(self.static, 6.0, 10.0, h=4.4, w=3.0, panel_h=1.5)
+        f = np.array(self.fire)
+        self.fires = dict(x=f[:, 0], y=f[:, 1], z=f[:, 2], size=f[:, 3], temp=f[:, 4], seed=rng.uniform(0, 100, len(f)))
+
+    # Static -----------------------------------------------------------------
+
+    def _ground(self, rng) -> None:
+        s = self.static
+        s.add("sand", tr((0, 0, 0)), SAND, 0.0, GROUND, p2=1.0)  # p2=1: sand never chars
+        s.add("wet", tr((0, 0.006, 0)), rgb("#c9a878"), 0.0, GROUND, p2=1.0)
+        s.add("walk", tr((0, 0.04, 0)), rgb("#d8c8b0"), 0.0, GROUND)
+        s.add("grass", tr((0, 0.02, 0)), rgb("#6e9a48"), 0.0, GROUND)
+        s.add("box", props.block(-3000, 3000, -9, -6, -4000, 400), rgb("#4a6a6a"))  # sea bed
+        # The water: a turquoise lagoon, deepening to blue offshore.
+        for z0, z1, c in ((400, -120, "#3fb8b0"), (-120, -420, "#2f93ac"), (-420, -6000, "#25608c")):
+            s.add("quad", chain(tr((0, SEA_Y, (z0 + z1) / 2)), sc((9000, 1, z0 - z1))), rgb(c), 0.0, WATER)
+
+    def _sea(self, rng) -> None:
+        s = self.static
+        self.boats = []
+        for _ in range(9):  # sailboats out on the bay
+            z = rng.uniform(-900, -260)
+            x = rng.uniform(-260, -40) * (-z / 500)
+            self.boats.append((x, z, rng.uniform(0, 6), rng.uniform(0.8, 1.2)))
+        n = 14  # a line of swim buoys
+        zs = np.linspace(-10, -120, n)
+        s.add("ico0", chain(tr(np.stack([shore_x(zs) - 26, np.full(n, SEA_Y), zs], 1)), sc(0.7)),
+              [rgb(("#e8483d", "#f2c14e")[i % 2]) for i in range(n)])
+        # A low palm island (motu) and the volcanic peaks behind it.
+        for x, z, w in ((-190, -1000, 160), (-120, -1060, 90)):
+            s.add("ico", chain(tr((x, -3, z)), sc((w, 8, w * 0.4))), rgb("#d8c49a"))
+            s.add("ico", chain(tr((x, -2, z)), sc((w * 0.8, 16, w * 0.3))), rgb("#3f7a4a"))
+        for _ in range(16):
+            x = rng.uniform(-260, -80)
+            self._palm(x, -1030 + rng.uniform(-15, 15), 2.0, rng.uniform(10, 16), rng, lean=0.1)
+        for _ in range(14):
+            z = rng.uniform(-2700, -1800)
+            x = math.tan(math.radians(rng.uniform(-19, -3))) * -z
+            h = rng.uniform(50, 150)
+            r = rng.uniform(260, 520)
+            s.add("cone6", chain(tr((x, -10, z)), ry(rng.uniform(0, 1)), sc((r, h, r * 0.7))),
+                  rgb(rng.choice(["#7a6aa0", "#6f6296", "#8572a8", "#7c6ca2"])))
+        for _ in range(10):  # far ridges on the right, behind the headland
+            z = rng.uniform(-2600, -1700)
+            x = math.tan(math.radians(rng.uniform(2, 24))) * -z
+            h = rng.uniform(50, 120)
+            r = rng.uniform(600, 1200)
+            s.add("cone6", chain(tr((x, -10, z)), ry(rng.uniform(0, 1)), sc((r, h, r * 0.7))),
+                  rgb(rng.choice(["#8a76a6", "#9580ad"])))
+
+    def _headland(self, rng) -> None:
+        s = self.static
+        lx, ly, lz = LIGHTHOUSE
+        s.add("ico", chain(tr((lx, -2, lz)), sc((30, 20, 26))), rgb("#8f7f6c"))  # the rock knoll
+        s.add("ico", chain(tr((lx + 9, -2, lz + 4)), sc((14, 10, 12))), rgb("#7c6e60"))
+        # Green domes closing the bay, rising behind the hotels.
+        self.domes = [(18, -222, 60, 40, 50), (55, -240, 80, 52, 50), (100, -260, 110, 70, 70), (160, -300, 160, 90, 90),
+                      (240, -330, 200, 100, 100), (80, -330, 160, 110, 100), (-2, -235, 44, 30, 40)]
+        for cx, cz, w, h, d in self.domes:
+            s.add("ico", chain(tr((cx, -2, cz)), ry(rng.uniform(0, 3)), sc((w, h, d))),
+                  rgb(rng.choice(["#4f8f4a", "#5a9a50", "#467f44"])))
+            self.fire.append((cx, h / 2 - 4, cz + d / 2 - 4, rng.uniform(4, 7), rng.uniform(520, 570)))  # dry grass
+        for _ in range(14):
+            dome = self.domes[rng.integers(0, len(self.domes))]
+            x = dome[0] + rng.uniform(-0.3, 0.3) * dome[2]
+            z = dome[1] + rng.uniform(-0.3, 0.3) * dome[4]
+            self._palm(x, z, _dome_y(x, z, dome), rng.uniform(9, 13), rng)
+        # The lighthouse: red and white bands, a gallery, the lamp, a red cap.
+        y = ly
+        for i, r in enumerate((4.2, 3.9, 3.6, 3.35, 3.1)):
+            s.add("cyl", chain(tr((lx, y, lz)), sc((r, 3.6, r))), rgb("#d6393a" if i % 2 else "#f4efe6"))
+            y += 3.6
+        s.add("cyl", chain(tr((lx, y, lz)), sc((4.4, 0.4, 4.4))), props.DARK)
+        s.add("cyl", chain(tr((lx, y + 0.4, lz)), sc((2.4, 2.2, 2.4))), rgb("#fff1c9"), 7.0, GLOW, p2=1.0)
+        s.add("cone", chain(tr((lx, y + 2.6, lz)), sc((3.2, 2.0, 3.2))), rgb("#c0392b"))
+        self.lamp = np.array([lx, y + 1.5, lz])
+        s.add("box", props.block(lx + 2, lx + 7, ly - 0.5, ly + 3, lz - 2, lz + 2), rgb("#f4efe6"))  # keeper's hut
+        s.add("prism", chain(tr((lx + 4.5, ly + 3, lz)), sc((5.6, 1.6, 4.4))), rgb("#c0392b"))
+
+    def _back(self, rng) -> None:
+        """Palms, the promenade with its lamps and string lights, then hotels."""
+        s = self.static
+        lamps = []
+        for z in np.arange(30.0, -200.0, -14.0):
+            x = float(back_x(z)) + 3.0
+            lamps.append(props.lamp_post(s, x, z, h=4.2))
+        for a, b in zip(lamps[:-1], lamps[1:]):
+            props.string_lights(s, (a[0], a[1] - 0.6, a[2]), (b[0], b[1] - 0.6, b[2]), sag=1.0, n=14, rng=rng)
+        for z in np.arange(34.0, -190.0, -7.5):  # a row of palms along the back of the beach
+            x = float(back_x(z)) + rng.uniform(-2.0, 9.0)
+            self._palm(x, z + rng.uniform(-2, 2), 0.0, rng.uniform(9, 14), rng)
+        for z in (-28.0, -64.0, -112.0):  # three palms leaning out over the water
+            self._palm(float(shore_x(z)) + 3.0, z, 0.0, rng.uniform(9, 11), rng, lean=0.45, yaw=-math.pi / 2)
+        for _ in range(16):  # hotels behind the palms
+            z = rng.uniform(-200, 10)
+            x = float(back_x(z)) + rng.uniform(14, 40)
+            w, h, d = rng.uniform(16, 30), rng.uniform(9, 24), rng.uniform(10, 16)
+            s.add("box", chain(tr((x, 0, z)), ry(rng.uniform(-0.2, 0.2)), sc((d, h, w))),
+                  rgb(rng.choice(["#f2dcc4", "#f4c8b4", "#e8e2d4", "#cfe4e0", "#f6e2a8"])), 0.0, BUILDING,
+                  seed=rng.uniform(0, 100), p1=0.35)
+            s.add("box", chain(tr((x, h, z)), sc((d + 0.6, 0.5, w + 0.6))), rgb("#c86a4a"))
+        for z in (-20.0, -96.0):  # wooden walkways across the sand
+            x0, x1 = float(shore_x(z)) + 5.0, float(back_x(z)) + 1.0
+            s.add("box", chain(tr(((x0 + x1) / 2, 0.0, z)), ry(math.pi / 2), sc((2.2, 0.16, x1 - x0))), rgb("#a07a58"),
+                  0.0, STRIPES, p1=(x1 - x0) / 0.5, p2=2)
+            for x in np.arange(x0 + 2, x1, 5.0):
+                self.fire.append((x, 0.16, z, rng.uniform(1.2, 1.8), rng.uniform(572, 595)))
+
+    def _palm(self, x, z, y0, h, rng, lean=0.18, yaw=None, frond=None) -> None:
+        yaw = rng.uniform(0, 2 * math.pi) if yaw is None else yaw
+        k = np.linspace(0, 1, 6)
+        off = lean * h * k ** 1.7
+        pts = np.stack([x + off * math.sin(yaw), y0 + h * k, z + off * math.cos(yaw)], 1)
+        widths = np.linspace(0.62, 0.38, 5)
+        d = pts[1:] - pts[:-1]
+        self.static.add("cyl5", chain(tr(pts[:-1]), align_y(d), sc(np.stack([widths, np.linalg.norm(d, axis=1), widths], 1))),
+                        rgb("#8a6c4c"))
+        top = pts[-1]
+        self.static.add("ico0", chain(tr(top + rng.uniform(-0.35, 0.35, (3, 3)) + (0, -0.5, 0)), sc(0.55)), rgb("#5a3d22"))
+        self.palms.append((top, rng.uniform(0, 2 * math.pi), frond or h * 0.42, rng.uniform(0, 100)))
+        self.fire.append((top[0], top[1] - 1.0, top[2], h * 0.3, rng.uniform(572, 590)))
+
+    def _beach_things(self, rng) -> None:
+        """Umbrellas, towels, loungers, kayaks and beach balls, in loose rows along the water."""
+        s = self.static
+        self.loungers, self.balls = [], []
+        canopy = [rgb(c) for c in ("#e8628f", "#f2c14e", "#4f8fe0", "#e2483d", "#3fb8af", "#ff9a5a", "#9b6fd6")]
+        towel = [rgb(c) for c in ("#e8483d", "#3d7bd9", "#f2b134", "#4caf7a", "#ff8fab", "#7fd1e8", "#f07f3c")]
+        for z in np.arange(30.0, -150.0, -7.0):
+            for k in range(3):
+                zz = z + rng.uniform(-2.5, 2.5)
+                x = float(shore_x(zz)) + 6.0 + k * 6.2 + rng.uniform(-1.5, 1.5)
+                if x > float(back_x(zz)) - 2.0 or rng.random() < 0.18:
+                    continue
+                if abs(zz + 82) < 7 and x < float(shore_x(zz)) + 12:  # leave room for the lifeguard tower
+                    continue
+                if rng.random() < 0.72:
+                    s.add("cyl5", chain(tr((x, 0, zz)), rx(rng.uniform(-0.08, 0.08)), sc((0.08, 2.5, 0.08))), props.WHITE)
+                    s.add("cone", chain(tr((x, 2.05, zz)), ry(rng.uniform(0, 1)), sc((3.4, 0.8, 3.4))),
+                          canopy[rng.integers(0, len(canopy))], 0.0, STRIPES, p1=8, p2=1)
+                    self.fire.append((x, 2.3, zz, rng.uniform(1.8, 2.6), rng.uniform(470, 530)))
+                for j in range(rng.integers(1, 3)):
+                    tx, tz, yaw = x + rng.uniform(-1.6, 1.6), zz + rng.uniform(-1.4, 1.4), rng.uniform(-0.6, 0.6)
+                    if rng.random() < 0.3:
+                        self.loungers.append((tx, tz, yaw + math.pi / 2))
+                        continue
+                    s.add("box", chain(tr((tx, 0.0, tz)), ry(yaw), sc((0.95, 0.03, 1.8))), towel[rng.integers(0, len(towel))],
+                          0.0, STRIPES, p1=4)
+                    if rng.random() < 0.85:  # a paperback left on the towel
+                        s.add("box", chain(tr((tx + 0.15, 0.03, tz + 0.4)), ry(yaw + 0.4), sc((0.14, 0.03, 0.2))),
+                              rgb(rng.choice(["#f2efe8", "#d64545", "#3d7bd9"])))
+                        self.fire.append((tx + 0.15, 0.05, tz + 0.4, rng.uniform(1.1, 1.6), rng.uniform(451, 458)))
+                if rng.random() < 0.25:
+                    self.balls.append((x + rng.uniform(-2.5, 2.5), zz + rng.uniform(-2, 2), rng.uniform(0, 6)))
+        self.kayaks = []
+        for z in (-6.0, -9.5, -13.0, -60.0, -64.0):
+            self.kayaks.append((float(shore_x(z)) + 3.5, z, rng.uniform(-0.15, 0.15) + math.pi / 2, len(self.kayaks)))
+        # The lifeguard tower: stilts, a yellow hut, a red roof, a ramp and a flag.
+        lx, lz = float(shore_x(-82.0)) + 6.0, -82.0
+        for dx in (-1.2, 1.2):
+            for dz in (-1.2, 1.2):
+                s.add("box", props.beam((lx + dx * 1.3, 0, lz + dz * 1.3), (lx + dx, 3.0, lz + dz), 0.18), rgb("#a07a58"))
+        s.add("box", props.block(lx - 1.6, lx + 1.6, 3.0, 3.25, lz - 1.6, lz + 1.6), rgb("#a07a58"))
+        s.add("box", props.block(lx - 1.3, lx + 1.3, 3.25, 5.1, lz - 1.3, lz + 1.3), rgb("#f2c14e"))
+        s.add("prism", chain(tr((lx, 5.1, lz)), sc((3.4, 1.0, 3.4))), rgb("#d6393a"))
+        s.add("box", props.beam((lx + 1.4, 3.0, lz), (lx + 4.6, 0.0, lz), 0.9), rgb("#a07a58"))
+        s.add("cyl5", chain(tr((lx - 1.2, 5.0, lz + 1.2)), sc((0.07, 2.6, 0.07))), props.WHITE)
+        s.add("box", chain(tr((lx - 0.6, 6.9, lz + 1.2)), sc((1.1, 0.7, 0.04))), rgb("#e2483d"), 0.0, STRIPES, p1=2)
+        self.fire.append((lx, 3.2, lz, 3.0, rng.uniform(572, 585)))
+
+    def _bar(self, rng) -> None:
+        """A thatched beach bar on the right, strung with lights."""
+        s = self.static
+        bx, bz = float(back_x(-36.0)) - 5.0, -36.0
+        for dx in (-3.2, 3.2):
+            for dz in (-2.4, 2.4):
+                s.add("cyl5", chain(tr((bx + dx, 0, bz + dz)), sc((0.3, 3.2, 0.3))), rgb("#7a5a3c"))
+        s.add("box", props.block(bx - 3.0, bx + 3.0, 0, 1.15, bz + 1.4, bz + 2.2), rgb("#8a5a3a"))  # the counter
+        s.add("box", props.block(bx - 3.2, bx + 3.2, 1.15, 1.25, bz + 1.3, bz + 2.4), rgb("#c89a6a"))
+        s.add("box", props.block(bx - 2.8, bx + 2.8, 0, 2.6, bz - 2.3, bz - 1.9), rgb("#7a5a3c"))  # back wall
+        s.add("box", props.block(bx - 2.4, bx + 2.4, 1.3, 2.2, bz - 1.88, bz - 1.85), rgb("#ffd9a0"), 1.8, GLOW, p2=1.0)
+        s.add("cone6", chain(tr((bx, 3.0, bz)), sc((10.0, 3.0, 8.4))), rgb("#c8a062"))  # thatch
+        s.add("cyl", chain(tr((bx, 2.8, bz)), sc((10.0, 0.45, 8.4))), rgb("#b08850"))
+        for i in range(5):  # stools
+            s.add("cyl5", chain(tr((bx - 2.4 + i * 1.2, 0, bz + 3.0)), sc((0.45, 0.75, 0.45))), rgb("#d6393a"))
+        for a, b in (((bx - 4.5, 3.0, bz + 3.5), (bx + 4.5, 3.0, bz + 3.5)), ((bx - 4.5, 3.0, bz + 3.5), (bx - 9.0, 4.6, bz + 9.0)),
+                     ((bx + 4.5, 3.0, bz + 3.5), (bx + 8.0, 4.6, bz - 8.0))):
+            props.string_lights(s, a, b, sag=0.7, n=12, rng=rng)
+        for a in np.linspace(0, 2 * math.pi, 7, endpoint=False):
+            self.fire.append((bx + 4.0 * math.cos(a), 3.6, bz + 3.4 * math.sin(a), rng.uniform(2.4, 3.4), rng.uniform(480, 540)))
+        self.fire.append((bx, 1.0, bz, 3.0, rng.uniform(572, 585)))
+
+    def _crowd(self, rng) -> None:
+        lanes = []
+        for z0, z1, n in ((26.0, -10.0, 60), (-10.0, -50.0, 55), (-50.0, -100.0, 45), (-100.0, -150.0, 30)):
+            zs = np.linspace(z0, z1, 12)
+            lo, hi = float(shore_x(zs).max()) + 1.0, float(back_x(zs).min()) - 1.0
+            lanes += [(n // 2, (lo, hi), (z1, z0), 1), (n - n // 2, (lo, hi), (z1, z0), 0)]
+            lanes.append((8, (float(shore_x(zs).min()) - 12.0, float(shore_x(zs).min()) - 3.0), (z1, z0), 1))  # waders
+        self.crowd = props.Crowd(rng, lanes, y_at=lambda x, z: -np.clip((shore_x(z) - x) * 0.12, 0.0, 1.0),
+                                 standing=0.35)
+        p = self.crowd.p
+        n = self.crowd.n
+        p["leave"] = np.array([self.timeline.time_at_temp(f) for f in rng.uniform(110, 175, n)])
+        p["exit"] = np.stack([back_x(p["z"]) + 12.0, np.zeros(n), p["z"] - rng.uniform(0, 6, n)], 1)  # up into the shade
+
+    # Dynamic ----------------------------------------------------------------
+
+    def power(self, temp: float) -> float:
+        return 1.0 - ramp(temp, 255.0, 290.0)
+
+    def dynamic(self, t: float, fx: Effects) -> Instances:
+        d = Instances()
+        temp = fx.temp_f
+        for k, ph in enumerate((0.0, 2.6)):  # waves washing up the sand
+            w = math.sin(t * 0.8 + ph)
+            d.add("foam", tr((0.4 + 0.7 * w, 0.02 + 0.01 * k, 0)), rgb("#e8ece8"), 0.0, 0)
+        for x, z, yaw, bob in self.boats:
+            y = SEA_Y - 0.9 + 0.25 * math.sin(t * 1.1 * bob + yaw)
+            d.add("hull", chain(tr((x, y, z)), ry(yaw), rx(0.03 * math.sin(t * 0.9 + yaw)), sc((2.4, 1.3, 7.0))), props.WHITE)
+            d.add("cone", chain(tr((x, y + 1.2, z)), ry(yaw), sc((3.4, 9.0, 0.2))), props.WHITE)
+        self.crowd.draw(d, t)
+        self._draw_palms(d, t, temp)
+        self._draw_plastic(d, t, temp)
+        steam = ramp(temp, 208.0, 240.0)
+        if steam > 0:
+            zs = np.repeat(np.linspace(-20, -240, 16), 6)
+            xs = shore_x(zs) - np.tile([4.0, 10.0, 18.0, 28.0, 42.0, 60.0], 16) * (1 + 0.006 * -zs)
+            props.draw_puffs(d, xs, zs, SEA_Y + 0.3, t, steam * (0.6 + 0.4 * ramp(temp, 300.0, 420.0)), rgb("#f2eef0"),
+                             rise=1.2, spread=5.0, size=1.4, n_max=360)
+        f = self.fires
+        on = temp >= f["temp"]
+        if on.any():
+            grow = np.clip((temp - f["temp"][on]) / 25.0, 0.15, 1.0)
+            props.draw_flames(d, f["x"][on], f["y"][on], f["z"][on], f["size"][on] * grow, f["seed"][on], t)
+        return d
+
+    def _draw_palms(self, d: Instances, t: float, temp: float) -> None:
+        burnt = ramp(temp, 572.0, 586.0)
+        if burnt >= 1.0:
+            return
+        wilt = ramp(temp, 300.0, 450.0)
+        color = _mix(_mix(rgb("#3f8a3a"), rgb("#2f7434"), 0.5), rgb("#8a5a24"), ramp(temp, 220.0, 380.0))
+        tops, yaws, lens = [], [], []
+        for top, yaw0, length, seed in self.palms:
+            n = 8
+            yaw = yaw0 + np.arange(n) * 2 * np.pi / n + 0.12 * np.sin(np.arange(n) * 2.3 + seed)
+            yaw = yaw + 0.05 * np.sin(t * 1.3 + seed + np.arange(n))  # the breeze
+            tops.append(np.repeat(top[None], n, 0))
+            yaws.append(yaw)
+            lens.append(np.full(n, length) * (1 - 0.25 * wilt) * (1 - burnt))
+        top, yaw, length = np.concatenate(tops), np.concatenate(yaws), np.concatenate(lens)
+        rise = math.radians(62 + 30 * wilt)  # from vertical: fronds arch up, then droop as they wilt
+        fall = math.radians(128 + 30 * wilt)
+        inner = length * 0.45
+        mid = top + np.stack([np.sin(yaw) * math.sin(rise), np.full_like(yaw, math.cos(rise)), np.cos(yaw) * math.sin(rise)], 1) * inner[:, None]
+        w = np.stack([np.full_like(length, 0.9), inner, np.full_like(length, 0.07)], 1)
+        d.add("box", chain(tr(top), ry(yaw), rx(rise), sc(w)), color)
+        w2 = np.stack([np.full_like(length, 1.25), length * 0.6, np.full_like(length, 0.07)], 1)
+        d.add("cone5", chain(tr(mid), ry(yaw), rx(fall), sc(w2)), color)
+
+    def _draw_plastic(self, d: Instances, t: float, temp: float) -> None:
+        sag = ramp(temp, 250.0, 330.0)  # polyethylene kayaks soften and slump
+        colors = [rgb(c) for c in ("#f2b134", "#e8483d", "#3fb8af", "#ff8a3d", "#4f8fe0")]
+        for x, z, yaw, i in self.kayaks:
+            d.add("hull", chain(tr((x, 0, z)), ry(yaw), sc((0.8 * (1 + 0.5 * sag), 0.45 * (1 - 0.7 * sag), 3.8))), colors[i])
+        sag = ramp(temp, 280.0, 380.0)  # plastic loungers fold and sag
+        for x, z, yaw in self.loungers:
+            base = chain(tr((x, 0, z)), ry(yaw))
+            d.add("box", chain(base, tr((0, 0.32 * (1 - 0.8 * sag), 0)), sc((1.9 * (1 + 0.1 * sag), 0.08, 0.7 * (1 + 0.3 * sag)))),
+                  props.WHITE)
+            d.add("box", chain(base, tr((-0.95, 0.35 * (1 - 0.8 * sag), 0)), ry(math.pi / 2), rx(-0.9 - 0.6 * sag), sc((0.7, 0.75, 0.06))),
+                  props.WHITE)
+        pop = np.random.default_rng(5).uniform(285, 330, max(len(self.balls), 1))  # pressure rises; they burst
+        for (x, z, spin), p in zip(self.balls, pop):
+            if temp < p:
+                d.add("ico", chain(tr((x, 0.5, z)), ry(spin + 0.3 * t), sc(1.0)), rgb("#e8483d"), 0.0, STRIPES, p1=6, p2=1)
+            else:
+                d.add("ico0", chain(tr((x, 0.02, z)), ry(spin), sc((1.2, 0.06, 1.0))), rgb("#e8483d"))
+
+    def lights(self, t: float, fx: Effects, cam: np.ndarray, power: float) -> list:
+        return []
+
+    def camera(self, t: float, fx: Effects) -> tuple[np.ndarray, np.ndarray, float]:
+        return CAMERA.copy(), LOOK.copy(), 60.0
+
+    def sign_text(self, fx: Effects) -> str:
+        return f"{round(fx.temp_f):,}°F"
+
+    # Look -------------------------------------------------------------------
+
+    def look(self, t: float, fx: Effects, pos, look_pt, fov) -> Frame:
+        temp = fx.temp_f
+        warm = ramp(temp, 150.0, 420.0)
+        smoke = ramp(temp, 540.0, 640.0)
+        steam = ramp(temp, 230.0, 400.0)  # the boiling sea fills the air with haze
+
+        def sky(a, b, c, scale=1.0):
+            return _mix(_mix(rgb(a, scale), rgb(b, scale), warm), rgb(c, scale), smoke)
+
+        sun = _dir(*SUN_AZ_EL)
+        horizon = _mix(sky("#ffc890", "#ffb06a", "#9a4424"), rgb("#f4e0d0"), 0.35 * steam * (1 - smoke))
+        frame = Frame(
+            cam_pos=pos, cam_look=look_pt, fov=fov, time=t,
+            zenith=sky("#4a56a8", "#a0583e", "#3a1a12"), mid=sky("#d890b0", "#e08850", "#6e2e1a"), horizon=horizon,
+            stars=0.0, moon_dir=_dir(40, 25), moon_r=0.0, moon_col=(0, 0, 0), sun_dir=sun, body_dir=sun, body_d=1e6,
+            body_frame=np.eye(3), flattening=0.0, rings=(0.0, 0.0), bands=((1, 1, 1),) * 3, ring_col=(1, 1, 1),
+            body_bright=0.0, body_light=(0.0, 0.0, 0.0), glow_col=(0, 0, 0), glow=0.0,
+            amb_sky=sky("#a2a0d0", "#c09070", "#5a3020", 0.62), amb_ground=sky("#9a7a58", "#a0603a", "#40200f", 0.5),
+            fog_col=horizon, fog_density=0.0006 + 0.0016 * steam + 0.004 * smoke, power=self.power(temp), lava=0.0,
+            exposure=1.05, flash=0.0, flash_col=(1, 1, 1), fade=fx.fade,
+        )
+        frame.body_type = -1
+        frame.moon_vis = 0.0
+        frame.lights = []
+        frame.key_dir = sun
+        frame.key_col = rgb("#ffc890", 2.3 * (1 - 0.65 * smoke) * (1 - 0.3 * steam))
+        frame.cloud = sky("#f4b0c0", "#f0a070", "#4a2a20", 0.95)
+        frame.cloud_amt = 1.0 - 0.6 * warm
+        frame.sun_show, frame.sun_r = 1.0, 0.012
+        frame.sun_b = 7.0 * (1 - 0.6 * smoke) * (1 - 0.4 * steam)
+        frame.sun_glow = 0.9 * (1 - 0.5 * smoke)
+        frame.dry = ramp(temp, 110.0, 260.0)
+        frame.scorch = 0.92 * ramp(temp, 575.0, 645.0)
+        frame.boil = ramp(temp, 211.0, 228.0)
+        center = np.array([5.0, 0.0, -60.0])
+        frame.shadow_vp = ortho(170.0, 10.0, 9000.0) @ look_at(center + sun * 4000.0, center)
+        return frame

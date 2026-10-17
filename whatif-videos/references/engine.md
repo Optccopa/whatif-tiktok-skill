@@ -81,7 +81,7 @@ Use the same pattern for any new visual: a branch in the shader, a few uniforms,
   `harbor_look` into `forest_look`.
 - **Body position:** `harbor.BODY_DIR` (az 0°, el 10°) and `forest.BODY_AZ_EL` (3°, 8.5°).
   Flybys and strikes take theirs from `Timeline.direction(t)`.
-- **A new scene:** a class with `__init__(timeline, seed)`, `static` (Instances), `meshes` (dict, optional),
+- **A new scene:** read `scenes.md` first (framing, layers, palette, review loop). The interface: a class with `__init__(timeline, seed)`, `static` (Instances), `meshes` (dict, optional),
   `dynamic(t, fx) -> Instances`, `camera(t, fx) -> (pos, look, fov)` with a fixed position,
   `lights(t, fx, cam, power)`, `body_az_el` and `moon_az_el`. Register it in `video._scene_class` and
   `LOOKS`, and add an audio bed in `audio.soundtrack`.

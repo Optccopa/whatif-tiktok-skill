@@ -717,3 +717,218 @@
   teaser: Watch what happens at 8 minutes ⏱️
   question: What should happen to the Sun next?
   hashtags: [sun, space, science]
+
+- id: venus-crash
+  title: What if Venus crashed into Earth?
+  hook: "What if {Venus} crashed into Earth?"
+  category: space
+  scene: forest
+  accent: "#f2d38a"
+  body:
+    name: Venus
+    radius_mi: 3760
+    mass_earths: 0.815
+    start_mi: 24000000        # as close as it ever gets
+    bands: ["#efe2bc", "#e8d8aa", "#f2e9d0"]   # thick sulfuric acid clouds, almost featureless
+    light_color: "#fff0c8"
+  hud_label: DISTANCE TO VENUS
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "That bright 'star' is Venus. It's heading straight for us."}
+    - {at_s: 7.9, line: "It's almost a twin of Earth: nearly the same size."}
+    - {at_s: 12.0, line: "But its surface is 867°F: hot enough to melt lead."}
+    - {at_s: 16.1, line: "Its air is about 90 times heavier than ours."}
+    - {at_s: 20.2, line: "It spins backwards. A day there is longer than its year."}
+    - {gap_mi: 1000000, label: BIGGER THAN THE FULL MOON}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {at_s: 26.7, line: "Each time the distance halves, its tides get 8 times stronger."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Venus pulls the Moon away from Earth."}
+    - {event: surge, label: THE LAKE SURGES, line: "The lake sloshes from shore to shore."}
+    - {event: flood, label: THE VALLEY FLOODS, line: "Then it surges over its banks."}
+    - {at_s: 45.3, line: "Its pull bends the ground itself."}
+    - {at_s: 49.0, line: "The ground cracks. Volcanoes erupt everywhere."}
+    - {at_s: 53.1, line: "Two almost-twins, about to become one."}
+    - {event: impact, label: IMPACT}
+  final_line: "The heat would melt both planets into one glowing world."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Wait for the last line 👀
+  question: What should hit Earth next?
+  hashtags: [venus, space, astronomy]
+
+- id: dinosaur-asteroid
+  title: What if the dinosaur-killing asteroid hit today?
+  hook: "What if the {dinosaur-killing asteroid} hit today?"
+  category: space
+  scene: forest
+  mode: strike
+  accent: "#ffb26a"
+  body:
+    name: Asteroid
+    kind: asteroid
+    radius_mi: 3              # about 6 miles wide
+    mass_earths: 2.0e-10      # roughly a trillion tons of rock
+    start_mi: 30000000
+  strike:
+    at_s: 36
+    entry_alt_mi: 62
+    angle_deg: 60
+    speed_mph: 45000          # about 20 km/s
+    site_mi: 300
+    blast_after_s: 15
+    blast_real_s: 1100
+    coma_mi: 12               # no glowing cloud: just a lit rock
+  hud_label: DISTANCE TO ASTEROID
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: HEADED STRAIGHT FOR US}
+    - {at_s: 3.8, line: "66 million years ago, a rock like this ended the dinosaurs."}
+    - {at_s: 7.9, line: "It's about 6 miles wide: taller than Mount Everest."}
+    - {gap_mi: 238855, label: CLOSER THAN THE MOON, line: "It's now closer than the Moon."}
+    - {at_s: 16.1, line: "It's moving at 45,000 mph."}
+    - {at_s: 20.2, line: "At that speed, it would cross the US in four minutes."}
+    - {at_s: 24.3, line: "It hits with more energy than every nuke ever built."}
+    - {at_s: 28.4, line: "Nothing we have could stop it now."}
+    - {event: entry, label: IT HITS THE ATMOSPHERE, line: "It crosses the atmosphere in about 6 seconds."}
+    - {event: strike, label: IMPACT}
+    - {at_s: 36.6, line: "A flash brighter than the Sun. But no sound yet."}
+    - {at_s: 40.6, line: "It leaves a crater over 100 miles wide."}
+    - {at_s: 44.7, line: "Rock blasted into space falls back, glowing hot."}
+    - {event: blast, line: "Then the air blast hits."}
+    - {at_s: 53.6, line: "Winds stronger than any hurricane flatten the forest."}
+  final_line: "Then the dust would block the Sun for years."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Wait for the sound 🔊
+  question: What should hit Earth next?
+  hashtags: [asteroid, dinosaurs, space]
+
+- id: white-dwarf-crash
+  title: What if a white dwarf crashed into Earth?
+  hook: "What if a {white dwarf} crashed into Earth?"
+  category: space
+  scene: harbor
+  accent: "#cfe0ff"
+  body:
+    name: White dwarf
+    kind: star
+    radius_mi: 3600           # about Earth's size (Sirius B)
+    mass_earths: 340000       # about as heavy as the Sun
+    start_mi: 5879000000000   # one light-year
+    luminosity_suns: 0.056    # Sirius B
+    el_deg: 14
+    star_color: "#dfe8ff"     # about 45,000°F: blue-white hot
+    light_color: "#dfe8ff"
+  hud_label: DISTANCE TO WHITE DWARF
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: A DEAD STAR}
+    - {at_s: 3.8, line: "A white dwarf: the leftover core of a dead star."}
+    - {at_s: 7.9, line: "It's about the size of Earth, but as heavy as the Sun."}
+    - {at_s: 12.0, line: "A teaspoon of it would weigh about 5 tons."}
+    - {at_s: 16.1, line: "Its surface is about 45,000°F."}
+    - {at_s: 20.2, line: "Its gravity is about 400,000 times Earth's."}
+    - {at_s: 24.3, line: "From here, it's still just a faint star."}
+    - {at_s: 28.4, line: "But it's coming in fast, pulled by its own enormous gravity."}
+    - {event: sun, label: IT PULLS EARTH AWAY FROM THE SUN, line: "Its pull now beats the Sun's grip on Earth."}
+    - {event: steal, label: IT STEALS THE MOON}
+    - {temp_f: 212, label: THE OCEANS BOIL, line: "Its light now boils the oceans."}
+    - {temp_f: 572, label: WOOD BURNS BY ITSELF, line: "Every tree and building catches fire."}
+    - {at_s: 41.8, line: "Its tides are tens of thousands of times the Moon's."}
+    - {temp_f: 3000, label: EARTH IS TORN APART, line: "Its gravity starts tearing Earth apart."}
+    - {at_s: 49.5, line: "The rock it pulls off is hotter than lava."}
+    - {at_s: 53.6, line: "What's left falls in at thousands of miles a second."}
+    - {event: impact, label: IMPACT}
+  final_line: "Our Sun will become a white dwarf too, in about 5 billion years."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Wait for the last line ⭐
+  question: What should hit Earth next?
+  hashtags: [whitedwarf, space, astronomy]
+
+- id: saturn-crash-beach
+  title: What if Saturn crashed into Earth?
+  hook: "What if {Saturn} crashed into Earth?"
+  category: space
+  scene: beach
+  accent: "#f2c879"
+  body:
+    name: Saturn
+    radius_mi: 37449          # equatorial radius
+    mass_earths: 95.16
+    start_mi: 746000000       # as close as it gets to Earth
+    flattening: 0.098
+    rings: [1.24, 2.27]       # C ring inner edge to A ring outer edge
+    bands: ["#ecdcb4", "#c8a26a", "#a7aeb3"]
+    ring_color: "#dccaa5"
+  hud_label: DISTANCE TO SATURN
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "That bright dot is Saturn. It's heading straight for us."}
+    - {gap_mi: 365000000, label: AS CLOSE AS JUPITER EVER GETS}
+    - {at_s: 8.0, line: "Saturn is 95 times heavier than Earth."}
+    - {at_s: 12.0, line: "But it's so light for its size, it would float in water."}
+    - {at_s: 15.0, line: "Its rings are 170,000 miles across, and only about 30 feet thick."}
+    - {gap_mi: 34600000, label: AS CLOSE AS MARS EVER GETS, line: "It's now as close as Mars ever gets."}
+    - {at_s: 21.6, line: "You could see its rings without a telescope."}
+    - {gap_mi: 8000000, label: BIGGER THAN THE FULL MOON, line: "Saturn now looks bigger than the full Moon."}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {at_s: 32.6, line: "Every time the distance halves, its tides get 8 times stronger."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Saturn's gravity pulls the Moon away from Earth."}
+    - {at_s: 40.0, line: "The sea drains away from the shore..."}
+    - {at_s: 42.6, line: "...then comes back hundreds of feet high."}
+    - {gap_mi: 238855, label: WHERE THE MOON USED TO BE, line: "Saturn is now where the Moon used to be."}
+    - {at_s: 49.8, line: "Its pull bends the ground itself. Volcanoes erupt everywhere."}
+    - {event: rings, label: THE RINGS HIT, line: "We hit the rings first: ice moving at 40,000 mph."}
+    - {at_s: 55.0, line: "Saturn's tides tear Earth apart."}
+    - {event: impact, label: IMPACT}
+  final_line: "Saturn has no surface. Earth just sinks in."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch what happens to the Moon 🌙
+  question: What should hit Earth next?
+  hashtags: [whatif, saturn, space, astronomy, science]
+
+- id: jupiter-crash-beach
+  title: What if Jupiter crashed into Earth?
+  hook: "What if {Jupiter} crashed into Earth?"
+  category: space
+  scene: beach
+  accent: "#f0b88a"
+  body:
+    name: Jupiter
+    radius_mi: 43441          # equatorial radius
+    mass_earths: 317.8
+    start_mi: 365000000       # as close as it gets
+    flattening: 0.065
+    bands: ["#efe0c4", "#b8875c", "#a89c90"]
+    spot: [-22, -20, 0.09]    # the Great Red Spot, south of the equator
+    spot_color: "#c35f3e"
+    light_color: "#ffe2c0"
+  hud_label: DISTANCE TO JUPITER
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: AS CLOSE AS IT EVER GETS}
+    - {at_s: 3.8, line: "Jupiter: heavier than all the other planets put together."}
+    - {at_s: 8.0, line: "More than 1,300 Earths would fit inside it."}
+    - {at_s: 12.2, line: "A day there lasts less than 10 hours."}
+    - {gap_mi: 34600000, label: AS CLOSE AS MARS EVER GETS, line: "It's now as close as Mars ever gets."}
+    - {at_s: 19.2, line: "It may be the oldest planet in the solar system."}
+    - {gap_mi: 9500000, label: BIGGER THAN THE FULL MOON}
+    - {tide: 1, label: TIDES AS STRONG AS THE MOON'S, line: "Its pull on our oceans now matches the Moon's."}
+    - {at_s: 28.6, line: "It's a ball of gas. There's nowhere to stand."}
+    - {event: steal, label: IT STEALS THE MOON, line: "Its gravity pulls the Moon away from Earth."}
+    - {at_s: 36.4, line: "The sea drains away from the shore..."}
+    - {at_s: 39.4, line: "...then comes back as a wall of water."}
+    - {gap_mi: 238855, label: WHERE THE MOON USED TO BE, line: "Jupiter is now where the Moon used to be."}
+    - {at_s: 49.6, line: "Its tides are now tens of thousands of times the Moon's."}
+    - {gap_mi: 18640, label: EARTH STARTS TO BREAK APART, line: "Its tides tear Earth apart before it even touches."}
+    - {event: impact, label: IMPACT}
+  final_line: "Jupiter barely notices. It just got 0.3% heavier."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Jupiter wouldn't even notice 😳
+  question: What should hit Earth next?
+  hashtags: [whatif, jupiter, space, astronomy, science]

@@ -159,7 +159,7 @@ def test_rocky_surface_and_elevation_load(tmp_path):
   question: q
 """
     p = tmp_path / "s.yaml"
-    p.write_text(yaml_text)
+    p.write_text(yaml_text, encoding="utf-8")
     s = load_scenarios(p)["rocky-test"]
     assert s.body.surface == "rocky" and s.body.el_deg == 13
     assert scenarios_default_surface() == "bands"
@@ -216,6 +216,34 @@ def test_street_scenes_build_frames(scenarios):
         assert "limb" not in scene.frame(30.0)[1]  # by 30 s everyone has fled the heat or the cold
         x, y, depth = project(frame, scene.scene.sign_point)
         assert 0 < x < 1080 and 0 < y < 1920 and depth > 0  # the temperature board is in frame
+
+
+def test_lakeside_scene(scenarios):
+    """The kit template: loads by name, frames its landmark and sign clear of the text, reacts to heat."""
+    import dataclasses
+    from whatif.kit import framing_warnings
+    from whatif.video import WhatIfScene, sound_bed
+    s = dataclasses.replace(scenarios["hotter-every-second"], scene="lakeside")
+    scene = WhatIfScene(s, 65)
+    frame, dynamic, fx = scene.frame(1.0)
+    assert "limb" in dynamic and framing_warnings(scene.scene, frame) == []
+    assert scene.frame(56.0)[0].scorch > 0 and sound_bed(s) == "boardwalk"
+
+
+def test_beach_tsunami(scenarios):
+    """Space mode on the beach: the sea drains off the seabed, a wave wall rolls in, the beach floods."""
+    from whatif.video import WhatIfScene
+    scene = WhatIfScene(scenarios["saturn-crash-beach"], 65)
+    beach, tl = scene.scene, scene.timeline
+    assert getattr(beach, "sign_point", None) is None and beach.space_look == "harbor"
+    drained = beach.sea_level(tl.t_tide_surge - 0.1, tl.effects(tl.t_tide_surge - 0.1))
+    assert drained < -7 and beach.wave_front(tl.t_tide_surge - 2) is None
+    assert beach.wave_front(tl.t_tide_surge) < -1000 < beach.wave_front(tl.t_flood) < 100
+    assert beach.sea_level(tl.t_flood + 2, tl.effects(tl.t_flood + 2)) > 7
+    assert "wave_low" in scene.frame(tl.t_flood - 1)[1]
+    import dataclasses
+    heat = WhatIfScene(dataclasses.replace(scenarios["hotter-every-second"], scene="beach"), 65)
+    assert heat.scene.sign_point is not None and heat.scene.wave_front(50.0) is None
 
 
 def test_sun_approach_curve(scenarios):

@@ -394,7 +394,7 @@ class Timeline:
 
     def star_heats(self) -> bool:
         b = self.scenario.body
-        return b.kind == "star" and b.luminosity_suns >= 1.0
+        return b.kind == "star" and b.luminosity_suns >= 0.01
 
     def star_temp_f(self, t: float) -> float:
         """Earth's average temperature with a bright star nearby: sunlight plus starlight, T ~ flux^(1/4)."""
@@ -694,7 +694,7 @@ def _beat_time(item: dict, timeline: Timeline) -> float:
 
 
 def load_scenarios(path: Path = CATALOG_PATH, seconds: float = 65.0) -> dict[str, Scenario]:
-    raw = yaml.safe_load(path.read_text())
+    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     out: dict[str, Scenario] = {}
     for item in raw:
         body = item.get("body") or {"name": "Air", "radius_mi": 1, "mass_earths": 0, "start_mi": 1}

@@ -112,10 +112,10 @@ float shadow_at(vec3 n) {
     if (p.x <= 0.0 || p.x >= 1.0 || p.y <= 0.0 || p.y >= 1.0 || p.z >= 1.0) return 1.0;
     float sum = 0.0;
     vec2 texel = 1.0 / vec2(textureSize(u_shadow_map, 0));
-    for (int i = -1; i <= 1; i++)
-        for (int j = -1; j <= 1; j++)
+    for (int i = -2; i <= 2; i++)
+        for (int j = -2; j <= 2; j++)
             sum += texture(u_shadow_map, vec3(p.xy + vec2(i, j) * texel, p.z - 0.0008));
-    return sum / 9.0;
+    return sum / 25.0;
 }
 
 vec3 point_lights(vec3 n) {
@@ -212,7 +212,7 @@ void main() {
             vec3 straw = vec3(0.36, 0.28, 0.12) * (0.6 + 0.6 * dot(albedo, vec3(0.33)) / max(albedo.g, 0.02));
             albedo = mix(albedo, straw, green * u_dry);
         }
-        if (u_scorch > 0.0) {  // charring spreads in patches until everything is black
+        if (u_scorch > 0.0 && !(mat == 7 && v_params.w > 0.5)) {  // charring spreads in patches until everything is black (p2=1 ground, e.g. sand, never chars)
             float patch = vnoise(v_world.xz * 0.35 + v_world.y * 0.2) * 0.6 + hash13(floor(v_world * 1.7)) * 0.4;
             float burnt = smoothstep(patch - 0.15, patch + 0.15, u_scorch * 1.3 - 0.15);
             albedo = mix(albedo, vec3(0.025, 0.02, 0.018), burnt);
@@ -347,7 +347,7 @@ float hash13(vec3 p) {
     p += dot(p, p.zyx + 31.32);
     return fract((p.x + p.y) * p.z);
 }
-float noise2(vec2 p) {
+float hnoise2(vec2 p) {
     vec2 i = floor(p), f = fract(p);
     vec2 u = f * f * (3.0 - 2.0 * f);
     return mix(mix(hash12(i), hash12(i + vec2(1, 0)), u.x), mix(hash12(i + vec2(0, 1)), hash12(i + vec2(1, 1)), u.x), u.y);
@@ -356,7 +356,7 @@ float noise2(vec2 p) {
 float fbm(vec2 p) {
     float v = 0.0, a = 0.5;
     for (int i = 0; i < 4; i++) {
-        v += a * noise2(p);
+        v += a * hnoise2(p);
         p = p * 2.03 + vec2(17.1, 9.2);
         a *= 0.5;
     }
@@ -570,8 +570,10 @@ void main() {
         float start = smoothstep(-0.004, 0.02, ax) * step(dot(dir, S), 1.0) * step(0.0, dot(dir, S) + 0.3);
         float curve = 0.35 * along * along;
         float w = 0.01 + along * 0.32;
-        float dust = exp(-pow((ay - curve) / w, 2.0)) * exp(-along / u_tail_len) * start;
-        float ion = exp(-pow(ay / (0.004 + along * 0.025), 2.0)) * exp(-along / (u_tail_len * 1.5)) * start;
+        float tail_on = step(1e-4, u_tail_len);  // asteroids have no tail (and no division by zero)
+        float tl = max(u_tail_len, 1e-4);
+        float dust = exp(-pow((ay - curve) / w, 2.0)) * exp(-along / tl) * start * tail_on;
+        float ion = exp(-pow(ay / (0.004 + along * 0.025), 2.0)) * exp(-along / (tl * 1.5)) * start * tail_on;
         float streaks = 0.9 + 0.1 * sin(ay / w * 6.0 + along * 18.0 - u_time * 0.3);
         float headward = 1.0 + 1.5 * exp(-along / 0.06);   // brightest close to the head
         vec3 tails = (u_tail_col * dust * streaks * 0.8 + vec3(0.5, 0.72, 1.0) * ion * 0.5) * headward;
@@ -634,7 +636,7 @@ void main() {
         if (rr < 1.0) {
             vec3 nrm = o.x * right + o.y * up + sqrt(1.0 - rr * rr) * (-u_moon_dir);
             float lit = max(dot(nrm, u_sun_dir), 0.0);
-            float maria = smoothstep(0.45, 0.75, noise2(o * 2.3 + 5.0)) * 0.35 + noise2(o * 9.0) * 0.12;
+            float maria = smoothstep(0.45, 0.75, hnoise2(o * 2.3 + 5.0)) * 0.35 + hnoise2(o * 9.0) * 0.12;
             vec3 m = vec3(0.92, 0.9, 0.84) * (1.0 - maria) * (0.06 + 1.6 * lit);
             float cover = 1.0 - smoothstep(1.0 - 1.5 * u_px / u_moon_r, 1.0, rr);
             col = mix(col, m, cover * u_moon_vis);
@@ -648,7 +650,7 @@ void main() {
         float disk = 1.0 - smoothstep(R - edge, R + edge, th);
         float mu = sqrt(max(1.0 - pow(th / max(R, 1e-7), 2.0), 0.0));
         vec3 dir2 = normalize(dir - u_body_dir * dot(dir, u_body_dir));
-        float spots = 0.85 + 0.15 * noise2(vec2(atan(dir2.y, dir2.x) * 3.0, th / max(R, 1e-6) * 4.0) + u_time * 0.05);
+        float spots = 0.85 + 0.15 * hnoise2(vec2(atan(dir2.y, dir2.x) * 3.0, th / max(R, 1e-6) * 4.0) + u_time * 0.05);
         col = mix(col, u_star_col * u_star_bright * (0.45 + 0.55 * mu) * spots, disk);
         col += u_star_col * u_star_bright * 0.22 * exp(-max(th - R, 0.0) / (R * 0.7 + 0.004)) * (1.0 - disk);
         col += u_star_col * 0.3 * u_glow * exp(-th / 0.35);   // its light scattering in our air, once it's bright
@@ -713,7 +715,7 @@ void main() {
         float lat = P.y + near * 0.012 * (fbm(vec2(lon * 24.0, P.y * 90.0)) - 0.5);
         float w = sin(lat * 24.0 + sin(lat * 9.0) * 1.4 + 0.25 * sin(lon * 3.0 + lat * 30.0));
         vec3 base = mix(u_band_a, u_band_b, 0.5 + 0.5 * w);
-        base *= 0.93 + 0.07 * sin(lat * 95.0 + sin(lat * 33.0) * 2.0 + noise2(vec2(lon * 6.0, lat * 40.0)) * 2.0);
+        base *= 0.93 + 0.07 * sin(lat * 95.0 + sin(lat * 33.0) * 2.0 + hnoise2(vec2(lon * 6.0, lat * 40.0)) * 2.0);
         base *= 1.0 + near * 0.25 * (fbm(vec2(lon * 60.0, lat * 260.0)) - 0.5);
         if (u_spot.z > 0.0) {   // a great storm: an oval with swirls and a pale collar
             vec2 q = vec2((lon - u_spot.y) / (u_spot.z * 2.2), (lat - u_spot.x) / u_spot.z);
@@ -857,6 +859,7 @@ uniform vec3 u_flash_col;
 uniform float u_fade;
 uniform float u_time;
 uniform vec2 u_size;
+uniform float u_grade;   // 0 = neutral; 1 = a gentle contrast curve and a little more color
 in vec2 v_uv;
 out vec4 f_color;
 
@@ -875,6 +878,12 @@ void main() {
     vec2 d = (v_uv - 0.5) * vec2(1.0, 0.75);
     c *= mix(0.72, 1.0, smoothstep(0.75, 0.2, length(d)));
     c = pow(c, vec3(1.0 / 2.2));
+    if (u_grade > 0.0) {
+        vec3 s = c * c * (3.0 - 2.0 * c);                       // S-curve
+        c = mix(c, s, 0.35 * u_grade);
+        float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+        c = clamp(mix(vec3(l), c, 1.0 + 0.12 * u_grade), 0.0, 1.0);  // saturation
+    }
     c = mix(c, u_flash_col, u_flash);
     c *= 1.0 - u_fade;
     c += (hash12(v_uv * u_size + fract(u_time) * 97.0) - 0.5) / 255.0;
@@ -1015,8 +1024,13 @@ def create_context() -> moderngl.Context:
 
 
 class Renderer:
-    def __init__(self, width: int, height: int, samples: int = 4):
-        self.w, self.h = width, height
+    def __init__(self, width: int, height: int, samples: int = 4, scale: int = 1, shadow: int = 2048,
+                 grade: float = 0.0):
+        """width x height is the output; the scene is drawn at scale x that and filtered down (supersampling)."""
+        self.out_w, self.out_h = width, height
+        self.w, self.h = width * scale, height * scale
+        self.shadow_size = shadow
+        self.grade = grade
         ctx = self.ctx = create_context()
         self.scene_prog = ctx.program(vertex_shader=VERTEX, fragment_shader=FRAGMENT)
         self.sky_prog = ctx.program(vertex_shader=FULLSCREEN.replace("vec4(in_pos, 0.0, 1.0)", "vec4(in_pos, 1.0, 1.0)"),
@@ -1029,24 +1043,26 @@ class Renderer:
                       for name, p in (("sky", self.sky_prog), ("bright", self.bright_prog),
                                       ("blur", self.blur_prog), ("comp", self.comp_prog))}
 
+        width, height = self.w, self.h
         self.msaa = ctx.framebuffer(
             color_attachments=[ctx.renderbuffer((width, height), 4, samples=samples, dtype="f2")],
             depth_attachment=ctx.depth_renderbuffer((width, height), samples=samples),
         )
         self.scene_tex = ctx.texture((width, height), 4, dtype="f2")
+        self.scene_tex.filter = (moderngl.LINEAR, moderngl.LINEAR)  # a 2x2 box when filtering a 2x render down
         self.scene_fbo = ctx.framebuffer(color_attachments=[self.scene_tex])
         self.bloom = []
-        for div in (4, 8):
-            size = (max(width // div, 1), max(height // div, 1))
+        for div in (4, 8):  # sized from the output, so the glow looks the same at any supersampling
+            size = (max(self.out_w // div, 1), max(self.out_h // div, 1))
             a, b = ctx.texture(size, 4, dtype="f2"), ctx.texture(size, 4, dtype="f2")
             for t in (a, b):
                 t.repeat_x = t.repeat_y = False
             self.bloom.append((size, a, b, ctx.framebuffer([a]), ctx.framebuffer([b])))
-        self.out_tex = ctx.texture((width, height), 3)
+        self.out_tex = ctx.texture((self.out_w, self.out_h), 3)
         self.out_fbo = ctx.framebuffer(color_attachments=[self.out_tex])
 
         self.shadow_prog = ctx.program(vertex_shader=SHADOW_VERTEX, fragment_shader=SHADOW_FRAGMENT)
-        self.shadow_tex = ctx.depth_texture((2048, 2048))
+        self.shadow_tex = ctx.depth_texture((shadow, shadow))
         self.shadow_tex.compare_func = "<="
         self.shadow_tex.repeat_x = self.shadow_tex.repeat_y = False
         self.shadow_fbo = ctx.framebuffer(depth_attachment=self.shadow_tex)
@@ -1106,7 +1122,7 @@ class Renderer:
         if f.shadow_vp is not None and not (self._shadow_vp is not None and np.allclose(f.shadow_vp, self._shadow_vp)):
             self._shadow_vp = f.shadow_vp.copy()  # depth from the sun's point of view (reused while the sun stays put)
             self.shadow_fbo.use()
-            ctx.viewport = (0, 0, 2048, 2048)
+            ctx.viewport = (0, 0, self.shadow_size, self.shadow_size)
             ctx.clear(depth=1.0)
             ctx.enable(moderngl.DEPTH_TEST)
             self.shadow_prog["u_lightvp"].write(_gl(f.shadow_vp))
@@ -1220,7 +1236,7 @@ class Renderer:
             source, threshold = a, 0.0
 
         self.out_fbo.use()
-        ctx.viewport = (0, 0, self.w, self.h)
+        ctx.viewport = (0, 0, self.out_w, self.out_h)
         self.scene_tex.use(0)
         bloom_out[0].use(1)
         bloom_out[1].use(2)
@@ -1231,10 +1247,11 @@ class Renderer:
         comp["u_flash_col"].value = f.flash_col
         comp["u_fade"].value = f.fade
         comp["u_time"].value = f.time
-        comp["u_size"].value = (float(self.w), float(self.h))
+        comp["u_size"].value = (float(self.out_w), float(self.out_h))
+        comp["u_grade"].value = self.grade
         self.quads["comp"].render()
         data = self.out_fbo.read(components=3, alignment=1)
-        return np.frombuffer(data, dtype=np.uint8).reshape(self.h, self.w, 3)[::-1]
+        return np.frombuffer(data, dtype=np.uint8).reshape(self.out_h, self.out_w, 3)[::-1]
 
     def release(self) -> None:
         self.ctx.release()

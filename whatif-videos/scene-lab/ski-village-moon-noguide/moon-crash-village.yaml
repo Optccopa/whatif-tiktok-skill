@@ -1,0 +1,50 @@
+# The Moon falls on a snowy ski village at dusk (scene: village).
+# Physics (center to center unless noted; Earth R 3,959 mi, Moon R 1,080 mi, 0.0123 Earths, 238,855 mi away):
+#   contact at 5,039 mi center. Each halving of the distance: tides x8, apparent width x2, light x4.
+#   free fall from 238,855 mi: (pi/2) x sqrt(r^3 / 2GM) = 4.8 days
+#   twice as wide: center 119,428 (gap 114,389). 10x wider: center 23,886 (gap 18,847) -> 100x a full Moon's light
+#   tides 10x / 300x / 3,000x at 11.3 s / 28.1 s / 39.4 s (check prints them)
+#   Earth's fluid Roche limit for the Moon: 2.44 x 3,959 x (5.51/3.34)^(1/3) = 11,410 mi center (gap 6,371)
+#   impact speed: sqrt(2GM (1/5,039 mi - 1/238,855 mi)) = 9.9 km/s = about 22,000 mph
+#   fresh snow reflects about 80-90% of visible light
+- id: moon-crash-village
+  title: What if the Moon crashed into Earth?
+  hook: "What if the {Moon} crashed into Earth?"
+  category: space
+  scene: village
+  accent: "#cfd6e6"
+  body:
+    name: Moon
+    is_moon: true
+    radius_mi: 1080
+    mass_earths: 0.0123
+    start_mi: 238855          # where it is today
+    surface: rocky
+    bands: ["#c9c6bf", "#6f6c66", "#c9c6bf"]   # highlands, maria, no polar caps
+    light_color: "#dfe6ff"
+  hud_label: DISTANCE TO THE MOON
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: OUR MOON}
+    - {at_s: 3.8, line: "Imagine the Moon stopped orbiting. It would fall."}
+    - {at_s: 7.9, line: "In real life, the fall would take about five days."}
+    - {gap_mi: 114389, label: TWICE AS WIDE AS USUAL}
+    - {at_s: 12.0, line: "It already looks twice as wide as usual."}
+    - {at_s: 16.1, line: "The last sunlight slips off the peaks."}
+    - {at_s: 20.2, line: "Each time the distance halves, its tides get 8 times stronger."}
+    - {at_s: 24.2, line: "Its light grows too. Fresh snow reflects almost all of it."}
+    - {event: surge, label: THE COASTS FLOOD, line: "Up here, we're safe from the sea. The coasts are not."}
+    - {gap_mi: 18847, label: 10 TIMES WIDER THAN USUAL, line: "It now looks 10 times wider, and shines 100 times brighter."}
+    - {at_s: 38.1, label: THE MOUNTAINS SHAKE, line: "Its pull flexes the rock itself. The mountains shake."}
+    - {at_s: 42.2, line: "Avalanches pour down the slopes. The power fails."}
+    - {gap_mi: 6371, label: EARTH'S PULL TEARS AT THE MOON}
+    - {at_s: 46.3, line: "Earth's gravity starts tearing the Moon apart."}
+    - {at_s: 50.4, line: "It hits at about 22,000 mph."}
+    - {at_s: 53.8, line: "Two worlds, about to become one."}
+    - {event: impact, label: IMPACT}
+  final_line: "Earth's whole surface would melt into an ocean of magma."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the mountains before it hits 🏔️
+  question: What should hit Earth next?
+  hashtags: [moon, space, astronomy, snow]

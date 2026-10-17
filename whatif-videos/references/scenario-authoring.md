@@ -11,7 +11,7 @@ Copy the closest catalog entry from `scripts/whatif/scenarios.yaml` and edit it.
   title: What if Mars crashed into Earth?
   hook: "What if {Mars} crashed into Earth?"   # {braces} = accent color; keep the whole hook on 2 lines
   category: space
-  scene: forest                        # harbor | forest
+  scene: forest                        # harbor | forest (space); boardwalk | plaza (temperature)
   accent: "#e8845a"                    # hook highlight + COMMENT BELOW; pick from the body's colors
   body:
     name: Mars
@@ -55,7 +55,8 @@ outro, outro_small, teaser, question, hashtags`, plus:
 | field | meaning |
 |---|---|
 | `name, radius_mi, mass_earths, start_mi` | required. `radius_mi` is the event horizon for black holes |
-| `kind` | `planet` (default), `star`, `pulsar`, `black_hole`, `comet` |
+| `kind` | `planet` (default), `star`, `pulsar`, `black_hole`, `comet`, `asteroid` (strike mode, no tail) |
+| `is_moon` | `true` when the body is our own Moon: the usual Moon is hidden and tides read "× NORMAL" |
 | `flattening` | oblateness (Saturn 0.098, Jupiter 0.065) |
 | `bands` | 3 hex colors: light band, dark band, poles |
 | `rings` | `[inner, outer]` in body radii |

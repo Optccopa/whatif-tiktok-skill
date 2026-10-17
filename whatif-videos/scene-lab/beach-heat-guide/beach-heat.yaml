@@ -1,0 +1,33 @@
+# "What if it got 10 degrees hotter every second?" on a tropical beach (scene: beach).
+# 75°F + 10°F/s: 645°F when the story ends at 57 s.
+- id: hotter-beach
+  title: What if it got 10 degrees hotter every second at the beach?
+  hook: "What if it got 10 degrees {hotter} every second?"
+  category: earth
+  scene: beach
+  mode: temperature
+  accent: "#ff9a4a"
+  temperature: {start_f: 75, rate_f_per_s: 10}
+  hud_label: TEMPERATURE
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: SUNSET ON THE BEACH}
+    - {at_s: 3.8, line: "Every second, it gets 10 degrees hotter."}
+    - {temp_f: 134, label: HOTTEST DAY EVER RECORDED, line: "Past 134: hotter than any day ever recorded."}   # Death Valley, 1913
+    - {at_s: 10.0, line: "The sand scorches bare feet. Everyone runs for shade."}
+    - {temp_f: 213, label: SEAWATER BOILS, line: "Seawater boils at 213, a degree later than fresh water."}   # salt raises it ~0.5°C
+    - {temp_f: 265, label: THE POWER FAILS, line: "The wiring cooks. The beach bar goes dark."}
+    - {at_s: 24.5, line: "Beach balls burst. Plastic kayaks slump and sag."}
+    - {at_s: 28.5, line: "The palm fronds wilt, curl and turn brown."}
+    - {at_s: 32.6, line: "Steam rolls off the boiling sea and swallows the islands."}
+    - {temp_f: 451, label: PAPER BURNS BY ITSELF, line: "At 451, the paperbacks left on the towels ignite."}
+    - {at_s: 41.6, line: "The umbrellas and the thatched roofs catch next."}
+    - {at_s: 45.7, line: "Wood is close to its limit now."}
+    - {temp_f: 572, label: WOOD BURNS BY ITSELF, line: "Wood goes at 572. Every palm, every plank, at once."}
+    - {temp_f: 621, label: LEAD MELTS, line: "Everything here is burning. Except the sand."}
+  final_line: "Four more minutes, and the sand itself would melt into glass."   # quartz melts ~3,110°F: (3110 − 645) / 10 ≈ 247 s
+  outro: Hotter or colder next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the sea at 213 👀
+  question: Hotter or colder next?
+  hashtags: [heatwave, beach, temperature, science]

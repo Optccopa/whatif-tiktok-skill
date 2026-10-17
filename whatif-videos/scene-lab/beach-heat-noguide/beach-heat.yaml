@@ -1,0 +1,32 @@
+- id: hotter-every-second-beach
+  title: What if it got 10 degrees hotter every second at the beach?
+  hook: "What if it got 10 degrees {hotter} every second?"
+  category: earth
+  scene: beach
+  mode: temperature
+  accent: "#ff9a4a"
+  temperature: {start_f: 75, rate_f_per_s: 10}
+  hud_label: TEMPERATURE
+  impact_s: 57                # 645°F when the story ends
+  beats:
+    - {at_s: 0, label: A TROPICAL AFTERNOON}
+    - {at_s: 3.8, line: "Every second, it gets 10 degrees hotter."}
+    - {temp_f: 134, label: HOTTEST DAY EVER RECORDED, line: "Past 134: hotter than any day ever recorded."}   # Death Valley, 1913
+    - {at_s: 9.9, line: "Everyone runs, leaving towels and books behind."}
+    - {temp_f: 213, label: THE SEA BOILS, line: "At 213, even salty seawater boils."}   # 3.5% salt raises the boiling point ~1°F
+    - {at_s: 17.8, line: "Steam rises off the whole lagoon."}
+    - {temp_f: 290, label: THE POWER FAILS, line: "The wiring cooks. The beach bar goes dark."}
+    - {at_s: 25.3, line: "Beach balls and pool floats swell, then burst."}
+    - {at_s: 29.3, line: "The plastic loungers sag and fold."}
+    - {at_s: 33.3, line: "The palm fronds curl up and crisp."}
+    - {temp_f: 451, label: PAPER BURNS BY ITSELF, line: "At 451, the abandoned paperbacks catch fire."}
+    - {temp_f: 490, label: POLYESTER MELTS, line: "Polyester melts near 480. The umbrellas droop."}   # PET melts 250-260°C
+    - {at_s: 45.6, line: "The wood starts to smoke. It's close to its limit."}
+    - {temp_f: 572, label: WOOD BURNS BY ITSELF, line: "Wood goes at 572. Every palm, every hut, at once."}
+    - {at_s: 53.7, line: "Smoke from the burning shore fills the sky."}
+  final_line: "In four more minutes, the sand itself would melt into glass."   # quartz melts ~3,110°F: (3100-645)/10 ≈ 245 s
+  outro: Which place should we heat up next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the lagoon at 213 👀
+  question: Which place should we heat up next?
+  hashtags: [heatwave, beach, temperature, science]

@@ -1,6 +1,6 @@
 ---
 name: whatif-videos
-description: Make 65-second vertical "What if…?" videos for TikTok, such as space disasters ("what if Mars crashed into Earth", "what if a black hole swallowed Earth") and everyday extremes ("what if it got 10 degrees hotter every second", "…colder every second"). They're low-poly 3D, rendered headless on the CPU, with a big serif hook, a distance readout, italic subtitles and a synthesized ambient soundtrack. Includes the full renderer, fonts, a 17-video catalog, the physics, the house style and the posting strategy. Use this skill whenever someone wants a what-if, space disaster, planet-crash, temperature, "what would happen if" or science-explainer short video, wants new scenario ideas, or wants a caption, posting schedule or cover advice for these videos, even if they don't say "skill" or "renderer".
+description: Make 65-second vertical "What if…?" videos for TikTok, such as space disasters ("what if Mars crashed into Earth", "what if a black hole swallowed Earth") and everyday extremes ("what if it got 10 degrees hotter every second", "…colder every second"). They're low-poly 3D, rendered with OpenGL (a GPU, or headless on the CPU), with a big serif hook, a distance readout, italic subtitles and a synthesized ambient soundtrack. Includes the full renderer, fonts, a 22-video catalog, the physics, the house style and the posting strategy. Use this skill whenever someone wants a what-if, space disaster, planet-crash, temperature, "what would happen if" or science-explainer short video, wants new scenario ideas, or wants a caption, posting schedule or cover advice for these videos, even if they don't say "skill" or "renderer".
 ---
 
 # What-if videos
@@ -29,15 +29,21 @@ apt-get install -y ffmpeg libegl1 libgl1-mesa-dri # headless OpenGL through Mesa
 python3 <skill>/scripts/whatif_cli.py list        # should print the catalog
 ```
 
+On Windows, install ffmpeg on PATH, skip the apt line (the GPU driver provides OpenGL) and set
+`PYTHONIOENCODING=utf-8` before running the CLI, because captions contain emoji.
+
 Everything runs through `scripts/whatif_cli.py` (call it by its full path from any directory).
 
 ## The workflow
 
-Follow these steps in order. Rendering takes 8–11 minutes, so most of the work goes into the
-cheap steps before it.
+Follow these steps in order. A render takes about 1 minute on a GPU and 8–11 minutes on a CPU,
+so most of the work goes into the cheap steps before it.
 
 1. **Pick the mode and scene** (table below). Most requests are an existing mode with a new body:
-   that's just a YAML entry, with no code.
+   that's just a YAML entry, with no code. A new place (a beach, a ski town, a desert road) is a new scene:
+   start it with `whatif_cli.py new-scene <name>` (a working template you then reshape) and read
+   `references/scenes.md` first, because a scene can be correct and still look nothing like the series.
+   Keep every scene you build in the skill: it is an asset for later videos.
 2. **Write the scenario** in a YAML file. Use the bundled catalog `scripts/whatif/scenarios.yaml` when
    working in the repo that holds this skill. Otherwise use a local file passed with `--catalog my.yaml`;
    it can hold one or more entries in the same format. Read `references/scenario-authoring.md`
@@ -56,12 +62,25 @@ cheap steps before it.
 
    Iterate here, not after a render.
 5. **Render:** `whatif_cli.py render <id> --out whatif-<id>.mp4` gives you 1080×1920, 30 fps, 65 s, AAC
-   ambience, under 20 MB (`--max-mb`). Run it in the background and **render only one video at a
+   ambience, under 20 MB (`--max-mb`). On a GPU, add `--quality high` (2× supersampling, sharper shadows, a light grade; ~10 s more). Run it in the background and **render only one video at a
    time**. The renderer uses every CPU core; two renders at once each take twice as long, and both
    can be killed by a container restart.
-6. **Verify:** `whatif_cli.py strip whatif-<id>.mp4` prints the duration, size and streams, and saves a
-   frame strip. Look at it before delivering. Expect 65.0 s, video plus audio, and 10–17 MB.
-7. **Deliver** the MP4 with its caption: `whatif_cli.py caption <id>` (format in `references/tiktok.md`).
+6. **Verify:** `whatif_cli.py strip whatif-<id>.mp4` prints the duration, size and streams. Expect
+   65.0 s, video plus audio, and 10–17 MB.
+7. **Check the sheet for rendering issues. Never skip this step, even when the stills looked fine.**
+   `whatif_cli.py sheet whatif-<id>.mp4` makes `whatif-<id>.sheet.png`, a grid with a frame every 3 s,
+   and puts the full-size frames in `whatif-<id>.frames/`. Open the sheet, then open at full size
+   any frame that looks off, plus the climax and the end card. Look for these problems:
+   - black or white blocks and NaN holes, and flicker between neighboring frames;
+   - sawtooth edges, stair-stepped terrain, banding in dark skies;
+   - things floating, clipping through the ground, or ending at a visible edge of the world;
+   - text that is cut off, overlapping, unreadable on a bright frame, or sitting off its in-scene sign
+     (the LED text must sit centered on the board);
+   - a whole frame washed out flat white or brown for more than a beat.
+
+   If you find a problem, fix it, re-render and check the sheet again. The user found these
+   problems after delivery before, so a clean sheet is what makes a video deliverable.
+8. **Deliver** the MP4 with its caption: `whatif_cli.py caption <id>` (format in `references/tiktok.md`).
 
 When asked for several videos, queue them and render them one after another. Send each one as it
 finishes, with its caption.
@@ -82,11 +101,13 @@ finishes, with its caption.
 | `forest` | golden-hour valley, lake, snowy peaks, lookout railing; sunset into night | planets (rings, storm spot), black holes, strikes, escape |
 | `boardwalk` | sunset carnival pier: crowds, striped stalls, string lights, Ferris wheel, lake, LED temperature sign | temperature (heat): people leave, grass dries, lake boils, power fails, popcorn pops, paper then wood ignite |
 | `plaza` | riverside city square: fountain, truss bridge, brick buildings, tree, pigeons, subway, LED sign | temperature (cold): fountain and river freeze, sea smoke, dry-ice snow, liquid-air rain, black silent sky |
+| `beach` | tropical bay: umbrellas, crowd, palms, beach bar, hotels, lighthouse headland | temperature (heat, sunset, LED sign) or `impact` planets (dusk): crowd stares then runs, sea drains off the seabed, tsunami wall, flood with debris |
 
 Body kinds: `planet` (oblate, banded or `surface: rocky`, optional rings and storm spot), `star` (glowing
 disk; harbor only), `pulsar` (a blinding point with two sweeping lighthouse beams and flashes; harbor only),
-`black_hole` (lensed shadow and disk; forest), `comet` (strike mode). Anything else, such as a white dwarf,
-a magnetar or an asteroid swarm, needs engine work. Read `references/engine.md`,
+`black_hole` (lensed shadow and disk; forest), `comet` and `asteroid` (strike mode; an asteroid has no tail).
+`is_moon: true` makes the body our own Moon. A `star` with `luminosity_suns` ≥ 0.01 also heats Earth. Anything else, such as a magnetar
+or an asteroid swarm, needs engine work. Read `references/engine.md`,
 which walks through adding a body kind.
 
 Alternate scenes from video to video so a profile grid doesn't look like one video posted twice.
@@ -122,7 +143,7 @@ More detail on the visual and sound language is in `references/style.md`.
 The first 2 seconds decide whether anyone watches; the end decides whether they comment.
 
 - **Hook:** "What if {X} crashed into Earth?" Braces mark the accent-colored words. Famous objects
-  with a simple verb do best: "crashed into" beats "passed by" by a wide margin. For temperature
+  with a simple verb do best. "Crashed into" beats "passed by" by a wide margin. For temperature
   videos: "What if it got 10 degrees {hotter} every second?"
 - **Arc:** scale ("95 times heavier than Earth") → a surprising fact ("it would float in water") →
   distance milestones ("as close as Mars ever gets") → the physics turning ("its pull now matches
@@ -140,6 +161,8 @@ The first 2 seconds decide whether anyone watches; the end decides whether they 
   plus a list of past mistakes to avoid.
 - `references/tiktok.md`: the caption format, hashtags, posting schedule, covers, what tends to work,
   and the idea backlog.
+- `references/scenes.md`: how to build a new scene that looks like it belongs in the series: framing,
+  depth layers, palette, wiring and a still-by-still review loop. Read it before writing a scene.
 - `references/engine.md`: how the renderer works and how to add a body kind, an effect or a sound.
   Read it only when a request needs something the YAML can't express.
 - `tests/test_engine.py`: run with `cd scripts && python3 -m pytest -q ../tests` after any engine change.

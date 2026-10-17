@@ -135,7 +135,7 @@ def sign_post(s: Instances, x, z, y0=0.0, h=4.2, w=3.0, panel_h=1.4, yaw=0.0) ->
     s.add("box", chain(tr((x, y0 + h - panel_h * 0.5, z)), ry(yaw), sc((w + 0.25, panel_h + 0.25, 0.25))), DARK)
     s.add("box", chain(tr((x, y0 + h - panel_h * 0.45, z + 0.13)), ry(yaw), sc((w, panel_h, 0.02))),
           rgb("#0c0c0e"))
-    return np.array([x, y0 + h - panel_h * 0.45, z + 0.15])
+    return np.array([x, y0 + h + panel_h * 0.05, z + 0.15])  # face center: boxes stand on their origin
 
 
 def trash_bin(s: Instances, x, z, y0=0.0) -> None:
@@ -174,6 +174,7 @@ class Crowd:
         p["leave"] = np.full(n, 1e9)  # set by the scene
         p["exit"] = np.zeros((n, 3))
         p["sink"] = np.zeros(n)  # exits that go down (stairs): how deep, in meters
+        p["stop"] = np.full(n, 1e9)  # when they stop strolling and stand facing p["face"] (e.g. to stare at the sky)
         self.p = p
         self.y_at = y_at or (lambda x, z: np.zeros_like(x))
         self.n = n
@@ -184,7 +185,7 @@ class Crowd:
         p = self.p
         span = np.maximum(p["hi"] - p["lo"], 1e-3)
         start = np.where(p["axis"] == 0, p["x"], p["z"])
-        tau = np.minimum(t, p["leave"])
+        tau = np.minimum(np.minimum(t, p["leave"]), p["stop"])
         s = (start - p["lo"]) + p["dir"] * p["speed"] * tau
         m = np.mod(s, 2 * span)
         forward = m < span
@@ -195,6 +196,9 @@ class Crowd:
         walk_yaw = np.where(p["axis"] == 0, heading * np.pi / 2, np.where(heading > 0, 0.0, np.pi))
         yaw = np.where(p["speed"] > 0, walk_yaw, p["face"])
         amp = np.where(p["speed"] > 0, 0.5, 0.0)
+        staring = t > p["stop"]
+        yaw = np.where(staring, p["face"], yaw)
+        amp = np.where(staring, 0.0, amp)
         phase = p["phase"] + tau * p["speed"] * 2.6
         # Leaving: walk briskly to the exit.
         gone = t - p["leave"]

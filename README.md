@@ -15,10 +15,11 @@ Text carries the story (no voice-over), with a synthesized ambient soundtrack th
 - **1080×1920, 30 fps, 65 s, under 20 MB**, ready for TikTok, YouTube Shorts and Reels.
 - **Five story modes:** impact, flyby, strike (a comet hits within sight), escape (Earth flung out of
   the galaxy) and temperature (the air heats or cools every second, or the Sun goes out).
-- **Four scenes:** a dusk harbor, a golden-hour forest valley, a sunset carnival boardwalk and a
-  riverside city plaza, each with crowds, lights and effects keyed to the physics.
-- **17 ready-made scenarios**, from Saturn, Jupiter and the Moon to a pulsar, a supermassive black hole,
-  the red supergiant Stephenson 2-18, and "the Sun goes out".
+- **Five scenes:** a dusk harbor, a golden-hour forest valley, a sunset carnival boardwalk, a riverside
+  city plaza and a tropical beach (with a tsunami), each with crowds, lights and effects keyed to the physics.
+  A lakeside template and a scene lab (beach, ski village, desert prototypes) give new scenes a head start.
+- **22 ready-made scenarios**, from Saturn, Jupiter, Venus and the Moon to a pulsar, a white dwarf, the
+  dinosaur-killing asteroid, a supermassive black hole, the red supergiant Stephenson 2-18, and "the Sun goes out".
 - **Scenarios are YAML.** Most new videos are a new entry, with no code.
 
 ## Quick start
@@ -32,10 +33,14 @@ python3 whatif_cli.py list                                   # the catalog
 python3 whatif_cli.py check saturn-crash                     # beat sheet + timing warnings
 python3 whatif_cli.py stills saturn-crash 5 30 50 --sheet sheet.png   # a few frames, fast
 python3 whatif_cli.py render saturn-crash --out saturn.mp4  # the full video with sound
+python3 whatif_cli.py sheet saturn.mp4                       # QA grid before you post
 python3 whatif_cli.py caption saturn-crash                   # a ready-to-post caption
+python3 whatif_cli.py new-scene rooftop                      # start a new scene from the template
 ```
 
-A render takes under a minute on a GPU and about 8–11 minutes on a 4-core CPU.
+A render takes about a minute on a GPU (add `--quality high` for supersampling) and about 8–11 minutes
+on a 4-core CPU. On Windows, put ffmpeg on PATH, skip the apt line (your GPU driver provides OpenGL) and
+set `PYTHONIOENCODING=utf-8`, since captions contain emoji.
 
 ## Use it as a Claude skill
 
@@ -71,8 +76,9 @@ or physical events:
 ```
 
 See [`references/scenario-authoring.md`](whatif-videos/references/scenario-authoring.md) for every
-field, the physics formulas and a fact sheet, and [`references/engine.md`](whatif-videos/references/engine.md)
-to add a new kind of body, effect or scene.
+field, the physics formulas and a fact sheet, [`references/scenes.md`](whatif-videos/references/scenes.md)
+for building a new scene, and [`references/engine.md`](whatif-videos/references/engine.md) to add a new
+kind of body or effect.
 
 ## Tests
 

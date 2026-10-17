@@ -226,7 +226,8 @@ def comet_look(scene: "WhatIfScene", t: float, fx: Effects, body_dir: np.ndarray
     el_now = tl.direction(t)[1]
     frame.sky_extra = dict(
         u_coma_r=min(math.atan(st.coma_mi / altitude), 0.5), u_comet_bright=0.0 if after else 0.55 + 0.6 * ramp(t, 0, tl.t_entry),
-        u_tail_dir=_direction(-40.0, 55.0), u_tail_len=0.4, u_tail_col=rgb("#fff0d6"),
+        u_tail_dir=_direction(-40.0, 55.0), u_tail_len=0.0 if scene.scenario.body.kind == "asteroid" else 0.4,
+        u_tail_col=rgb("#fff0d6"),
         u_entry=entry, u_trail_dir=_direction(25.0, 60.0), u_trail_len=math.radians(18.0 - el_now) + 0.05,
         u_site_dir=site, u_fireball=fx.glow, u_fireball_r=0.03 + 0.2 * ramp(t, tc, tc + 5.0),
         u_plume=ramp(t, tc + 0.3, tc + 11.0), u_plume_lit=phase("#e8b08a", "#d07040", "#5a4836"),
@@ -361,7 +362,17 @@ def _scene_class(name: str):
     if name == "plaza":
         from whatif.plaza import Plaza
         return Plaza
-    return Harbor
+    if name == "harbor":
+        return Harbor
+    import importlib  # any other scene: whatif/<name>.py, exporting its class as `Scene`
+    return importlib.import_module(f"whatif.{name}").Scene
+
+
+def sound_bed(scenario: Scenario) -> str:
+    """The ambience: the built-in scenes have their own; a kit scene names the one it reuses."""
+    if scenario.scene in ("harbor", "forest", "boardwalk", "plaza"):
+        return scenario.scene
+    return getattr(_scene_class(scenario.scene), "sound_bed", "forest")
 
 
 def project(frame: Frame, point, w: int = W, h: int = H) -> tuple[float, float, float] | None:
@@ -402,10 +413,11 @@ class WhatIfScene:
             if self.scenario.body.el_deg is not None:
                 el = self.scenario.body.el_deg
             body_dir = _direction(az, el)
-        if hasattr(self.scene, "look"):  # street scenes carry their own sky and light
+        space = getattr(self.scene, "space_look", None)
+        if hasattr(self.scene, "look") and not space:  # street scenes carry their own sky and light
             frame = self.scene.look(t, fx, pos, look, fov)
             return frame, self.scene.dynamic(t, fx).arrays(), fx
-        frame = LOOKS.get(self.scenario.scene, harbor_look)(self, t, fx, body_dir, pos, look, fov)
+        frame = LOOKS.get(space or self.scenario.scene, harbor_look)(self, t, fx, body_dir, pos, look, fov)
         if self.scenario.body.surface == "rocky":
             frame.surface = 1.0
         spot = self.scenario.body.spot
@@ -415,10 +427,19 @@ class WhatIfScene:
         return frame, self.scene.dynamic(t, fx).arrays(), fx
 
 
-def render_frames(scenario: Scenario, seconds: float, fps: int, seed: int = 0, only: list[int] | None = None):
+# Render quality presets. "standard" was tuned on a CPU (software OpenGL); with a GPU, "high" costs little.
+QUALITY = {
+    "draft": dict(samples=0, scale=1, shadow=1024, grade=0.0),  # fast previews: check timing, not looks
+    "standard": dict(samples=4, scale=1, shadow=2048, grade=0.0),
+    "high": dict(samples=4, scale=2, shadow=4096, grade=1.0),  # 2x supersampling, sharper shadows, a light grade
+}
+
+
+def render_frames(scenario: Scenario, seconds: float, fps: int, seed: int = 0, only: list[int] | None = None,
+                  quality: str = "standard"):
     """Yields (frame index, PIL image) for every frame (or just the ones in `only`)."""
     scene = WhatIfScene(scenario, seconds, seed)
-    renderer = Renderer(W, H)
+    renderer = Renderer(W, H, **QUALITY[quality])
     overlay = Overlay(scenario, scene.timeline)
     try:
         for name, mesh in scene.meshes.items():
@@ -453,6 +474,7 @@ def render_whatif(
     music_dir: str = "",
     max_bytes: int | None = None,
     seed: int = 0,
+    quality: str = "standard",
 ) -> Path:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     tmp = out_path.with_name(out_path.stem + ".part.mp4")
@@ -461,7 +483,7 @@ def render_whatif(
     music = pick_music(music_dir, scenario.id)
     sound = None
     if not music:  # the synthesized ambience, unless real music was supplied
-        sound = write_wav(tmp.with_suffix(".wav"), soundtrack(Timeline(scenario, seconds), scenario.scene, duration, seed))
+        sound = write_wav(tmp.with_suffix(".wav"), soundtrack(Timeline(scenario, seconds), sound_bed(scenario), duration, seed))
     audio_kbps = 128 if (music or sound) else 32
     max_kbps = bitrate_cap_kbps(max_bytes, duration, audio_kbps)
     cmd = ffmpeg_command(tmp, fps, duration, preset, crf, music, max_kbps, audio_kbps, x264_params=X264_PARAMS,
@@ -470,7 +492,7 @@ def render_whatif(
     began = time.monotonic()
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
     try:
-        for i, img in render_frames(scenario, seconds, fps, seed):
+        for i, img in render_frames(scenario, seconds, fps, seed, quality=quality):
             proc.stdin.write(img.tobytes())
             if i % (fps * 10) == 0:
                 log.info("%s: %ds rendered", scenario.id, i // fps)
@@ -493,7 +515,7 @@ def render_whatif(
 
 def add_soundtrack(video: Path, scenario: Scenario, seconds: float = 65.0, seed: int = 0) -> Path:
     """Replace the audio of an already-rendered video with the scenario's ambience (video copied as is)."""
-    wav = write_wav(video.with_suffix(".ambience.wav"), soundtrack(Timeline(scenario, seconds), scenario.scene,
+    wav = write_wav(video.with_suffix(".ambience.wav"), soundtrack(Timeline(scenario, seconds), sound_bed(scenario),
                                                                    seconds, seed))
     out = video.with_name(video.stem + ".sound.mp4")
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(video), "-i", str(wav),
@@ -505,12 +527,12 @@ def add_soundtrack(video: Path, scenario: Scenario, seconds: float = 65.0, seed:
 
 
 def render_whatif_stills(scenario: Scenario, times: list[float], out_dir: Path, seconds: float = 65.0,
-                         fps: int = 30, seed: int = 0) -> list[Path]:
+                         fps: int = 30, seed: int = 0, quality: str = "standard") -> list[Path]:
     """PNG frames at the given seconds, for checking the look without encoding a video."""
     out_dir.mkdir(parents=True, exist_ok=True)
     wanted = {int(round(t * fps)): t for t in times}
     paths = []
-    for i, img in render_frames(scenario, seconds, fps, seed, only=sorted(wanted)):
+    for i, img in render_frames(scenario, seconds, fps, seed, only=sorted(wanted), quality=quality):
         path = out_dir / f"{scenario.id}-{wanted[i]:05.1f}s.png"
         img.save(path)
         paths.append(path)

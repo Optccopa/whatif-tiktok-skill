@@ -1,0 +1,41 @@
+- id: moon-ski
+  title: What if the Moon crashed into Earth?
+  hook: "What if the {Moon} crashed into Earth?"
+  category: space
+  scene: ski
+  accent: "#cfd6e6"
+  body:
+    name: Moon
+    is_moon: true
+    radius_mi: 1080
+    mass_earths: 0.0123
+    start_mi: 238855          # where it is today
+    surface: rocky
+    bands: ["#c9c6bf", "#6f6c66", "#c9c6bf"]   # highlands, maria, no polar caps
+    light_color: "#dfe6ff"
+  hud_label: DISTANCE TO THE MOON
+  impact_s: 57
+  beats:
+    - {at_s: 0, label: OUR MOON}
+    - {at_s: 3.8, line: "Imagine the Moon stopped orbiting. It would fall."}
+    - {at_s: 7.9, line: "In real life, the fall would take about five days."}
+    - {gap_mi: 114389, label: TWICE AS WIDE AS USUAL}       # center 119,428 = half today's distance
+    - {at_s: 12.0, line: "It already looks more than twice as wide as usual."}
+    - {at_s: 16.1, line: "It's a quarter of Earth's width, and 81 times lighter."}
+    - {at_s: 20.2, line: "Down in the village, everyone stops to stare."}
+    - {at_s: 24.3, line: "Each time the distance halves, its tides get 8 times stronger."}
+    - {gap_mi: 28741, line: "It already shines like 50 full moons."}           # (238,855 / 33,780)^2 = 50
+    - {gap_mi: 18846, label: 10 TIMES WIDER THAN USUAL, line: "Ten times wider than usual, and 100 times brighter."}
+    - {gap_mi: 12550, label: CLOSER THAN GPS SATELLITES}    # GPS orbit altitude
+    - {at_s: 37.5, line: "The ground starts to shake. Everyone runs inside."}
+    - {at_s: 41.6, line: "Its tides are thousands of times normal. The power fails."}
+    - {at_s: 45.7, line: "The shaking sets off avalanches on every slope."}
+    - {at_s: 49.6, line: "Fires break out across the village."}
+    - {at_s: 53.4, line: "It hits at about 22,000 mph."}
+    - {event: impact, label: IMPACT}
+  final_line: "Earth's whole surface would melt into an ocean of magma."
+  outro: What should hit Earth next?
+  outro_small: COMMENT BELOW
+  teaser: Watch the mountains before it hits 🏔️
+  question: What should hit Earth next?
+  hashtags: [moon, space, astronomy, skiing]
