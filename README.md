@@ -21,7 +21,7 @@ Text carries the story (no voice-over), with a synthesized ambient soundtrack th
 - **22 ready-made scenarios**, from Saturn, Jupiter, Venus and the Moon to a pulsar, a white dwarf, the
   dinosaur-killing asteroid, a supermassive black hole, the red supergiant Stephenson 2-18, and "the Sun goes out".
 - **Scenarios are YAML.** Most new videos are a new entry, with no code.
-- 
+
 ## Use it as a Claude skill
 
 - **Claude Code:** copy the folder to `~/.claude/skills/whatif-videos` (all projects) or to
